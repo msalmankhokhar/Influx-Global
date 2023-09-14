@@ -1,0 +1,74 @@
+{% extends 'user/home.html' %}
+
+{% block title %}Wallet{% endblock title %}
+
+{% block css %}
+<style>
+#walletContainer{
+    /* border: 1px solid #ffffff61; */
+    margin: 5vw;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 30px;
+}
+
+#balanceContainer{
+    background: linear-gradient(90deg, #180848,#06101c,#180848);
+    padding: inherit;
+    border-radius: inherit;
+    display: flex;
+    /* flex-direction: column; */
+    /* align-items: center; */
+    justify-content: space-around;
+}
+
+#balanceContainer .heading{
+    font-size: 0.9rem;
+    
+}
+#balanceContainer .text{
+    font-weight: bold;
+    font-size: 1.2rem;    
+}
+
+#walletContainer .actions{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 10px;
+}
+
+#walletContainer .actions .btn{
+    border: 1px solid #ffffff61;
+    border-radius: 5px;
+}
+#walletContainer .actions .btn:hover{
+    border-color: orange;
+    background-color: orange;
+}
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div class="container" id="walletContainer">
+
+<div id="balanceContainer">
+        <span class="heading">Your Balance</span>
+        <span class="text">&dollar; {{user.wallet_balance}}</span>
+</div>
+
+<div class="actions">
+    <a href="/user/recharge" class="btn btnWithIcon">
+        <i class="fa-solid fa-coins"></i>
+        <span>Recharge</span>
+    <a href="" class="btn btnWithIcon">
+        <i class="fa-solid fa-money-bill-transfer"></i>
+        <span>Withdraw</span>
+    </a>
+</div>
+
+</div>
+
+{% endblock main %}

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat&family=Nunito&family=Open+Sans&family=Roboto&display=swap"
+        rel="stylesheet">
+    <title>{% block title %}Home{% endblock title %} | Influx Global</title>
+    <meta name="description"
+        content="{% block desc %}Earn Profitable returns while supporting the movie industry, Register Now to get $2 Bonus on first recharge{% endblock desc %}">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="/static/css/comman.css">
+    <link rel="stylesheet" href="/static/css/home/style.css">
+</head>
+
+{% block css %}{% endblock css %}
+
+<body>
+    {% block header %}
+    <header>
+        {% block nav %}
+        <nav>
+            <div id="NavlogoWrapper">
+                <img src="/static/img/logos/Png/Influx global logo Final Files-04.png" alt="" id="navLogo">
+            </div>
+            <ul>
+                <li><a href="" class="navlink">Home</a></li>
+                <!-- <li><a href="" class="navlink">About Us</a></li> -->
+                <li><a href="#footer" class="navlink">Contact Us</a></li>
+                <div class="btnsContainer">
+                    <a href="/login" class="btn btnNormal">Log In</a>
+                    <a href="/register" class="btn btnTrans">Register</a>
+                </div>
+            </ul>
+        </nav>
+        {% endblock nav %}
+
+        {% block headerContent %}
+        <div id="headerContent">
+            <div class="text">
+                <h1 class="textCenter">
+                    Earn Profitable returns while supporting the movie industry
+                </h1>
+                <p class="textCenter"><span>Register Now</span> to get <span>$2 Bonus</span> on first recharge</p>
+                <div class="btnsContainer">
+                    <a href="" class="btn btnNormal btnWithIcon">
+                        <span>Start Now</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a href="" class="btn btnTrans">Learn More about our earning program</a>
+                </div>
+            </div>
+        </div>
+        {% endblock headerContent %}
+    </header>
+    {% endblock header %}
+    {% block main %}
+    <main>
+        <section id="introSection" class="mainSection">
+            <div class="content">
+                <div class="left">
+                    <h1 class="sectionHeading textCenter">Company Introduction</h1>
+                    <div class="imgContainer">
+                        <img src="/static/img/logos/Png/Influx global logo Final Files-04.png" alt="">
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="imgContainer">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Zoetrope_Bldg_%26_Transamerica.JPG"
+                            alt="">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Hollywood_Sign_%28Zuschnitt%29.jpg/1024px-Hollywood_Sign_%28Zuschnitt%29.jpg"
+                            alt="">
+                    </div>
+                    <p class="sectionParaGraph customFontSize">Influx Global was founded in 2020. It is a subsidiary of
+                        America Film-world, specializing in promoting movies through pre-sales, announcements, and other
+                        means before their release, making them well-known and ensuring that all members have access to
+                        global movie news and can participate in movie promotion and receive investment returns.</p>
+                </div>
+            </div>
+        </section>
+        <!-- <hr> -->
+
+        <section id="earnSection" class="mainSection">
+            <h1 class="sectionHeading textCenter" style="text-align: right;">Earn Money with <br><span>Influx
+                    Global</span></h1>
+            <div class="text">
+                <p class="sectionParaGraph customFontSize">Influx Global has partnerships with movie theaters around the
+                    world. Users can purchase pre-sale movie tickets and daily movie tickets through the Influx Global
+                    application, which helps the movies increase their box office performance, thereby increasing their
+                    popularity and success in the market. As a result, the movie's producer pays Influx Global a certain
+                    amount of promotion and advertising fees. Users can earn income through Influx Global's loyalty
+                    reward program, member level system, and team income plan while supporting the movie industry.</p>
+                <div class="btnsContainer">
+                    <a href="" class="btn btnNormal">Learn more about earning plan</a>
+                    <a href="" class="btn btnTrans">Register Yourself</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    {% endblock main %}
+
+    {% block footer %}
+    <footer id="footer">
+        <div class="content">
+            <div class="footerSection contact">
+                <!-- <h1>Contact Us</h1> -->
+                <p>Contact us on Telegram for any queries</p>
+                <div class="content">
+                    <div>
+                        <a class="btn btnWithIcon" href="">
+                            <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-telegram" viewBox="0 0 16 16">
+                                <path
+                                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z" />
+                            </svg> -->
+                            <i class="fa-brands fa-telegram"></i>
+                            <span>Start Chat</span>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <p class="copyRight textCenter"> &copy 2020-23 - Influx Global Pvt(Ltd.)</p>
+    </footer>
+    {% endblock footer %}
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script> -->
+</body>
+<script src="https://kit.fontawesome.com/7d3f73a100.js" crossorigin="anonymous"></script>
+<script src="/static/js/script.js"></script>
+{% block js %}{% endblock js %}
+
+</html>

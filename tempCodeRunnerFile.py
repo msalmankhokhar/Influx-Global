@@ -1,0 +1,1 @@
+flask --app backend db migrate

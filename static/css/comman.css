@@ -1,0 +1,62 @@
+*{
+    padding: 0px;
+    margin: 0px;
+    color: white;
+    /* font-family: 'Montserrat', sans-serif; */
+    font-family: 'Nunito', sans-serif;
+    /* font-family: 'Open Sans', sans-serif; */
+    /* font-family: 'Roboto', sans-serif; */
+}
+
+/* Some Utility classes */
+.textCenter{
+    text-align: center;
+}
+
+html{
+    scroll-behavior: smooth;
+}
+
+a.btn{
+    text-decoration: none;
+}
+
+a.navlink{
+    text-decoration: none;
+}
+
+.btn, .navlink{
+    font-size: 0.85rem;
+}
+
+.btn{
+    background: none;
+    border: none;
+    padding: 13px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.btnWithIcon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 10px;
+}
+
+.btn.btnNormal{
+    background-color: #bd6903;
+    border: 1px solid #bd6903;
+    /* background: linear-gradient(0deg, gold, black, orange); */
+}
+
+.btn.btnTrans{
+    background: none;
+    border: 1px solid rgb(151, 151, 151);
+}
+
+.btn.btnTrans:hover{
+    background-color: rgb(46, 46, 46);
+    background-color: black;
+    border-color: black;
+}

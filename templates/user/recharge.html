@@ -1,0 +1,49 @@
+{% extends 'user/home.html' %}
+
+{% block title %}Recharge{% endblock title %}
+
+{% block css %}
+<style>
+    #formContainer{
+        height: 85vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        row-gap: 3vh;
+    }
+    #formContainer form{
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        row-gap: 10px;
+    }
+    input{
+        border: 1px solid rgb(18 18 18 / 47%);
+        border-radius: 5px;
+        padding: 13px;
+        color: black;
+        background: none;
+        outline: none;
+    }
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div id="formContainer">
+    <h1>Enter recharge amount in Dollars and pay in USDT</h1>
+    <form action="" method="post">
+        <input type="number" name="amount" id="" placeholder="Recharge Amount(&dollar;)">
+        <button type="submit" class="btn btnNormal btnWithIcon">
+            <i class="fa-solid fa-arrow-right-long"></i>
+            <span>Continue</span>
+        </button>
+    </form>
+</div>
+
+{% endblock main %}
+
+{% block js %}{% endblock js %}

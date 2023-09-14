@@ -1,0 +1,175 @@
+
+body{
+    background: linear-gradient(45deg, black, transparent);
+    background-color: #02151e;
+    min-height: 100vh;
+}
+
+nav{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    /* background-color: cadetblue; */
+    /* background-color: #202020; */
+    background-color: #001118;
+    position: sticky;
+    top: 0px;
+    z-index: 1;
+}
+
+#navLogoLink{
+    /* text-decoration: none; */
+    /* font-weight: bold; */
+    /* font-size: 1.3rem; */
+    /* font-size: 1.6vw; */
+    background-color: black;
+    border-radius: 100%;
+}
+
+#navLogo{
+    width: 6vw;
+}
+
+/* #navLogo span{
+    font-size: 0.8rem;
+    font-weight: normal;
+} */
+
+/* nav ul{
+    list-style: none;
+    display: flex;
+    align-items: center;
+    column-gap: 40px;
+} */
+
+.navlink{
+    font-size: 1vw;
+}
+
+.navlink.navlinkWithIcon{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+    row-gap: 4px;
+    height: 100%;
+    width: 8vw;
+}
+
+.navlink.navlinkWithIcon i{
+    font-size: 2vw;
+}
+
+.navlink.navlinkWithIcon:hover *{
+    color: gold;
+}
+
+.container{
+    padding-top: 10vh;
+    padding-bottom: 10vh;
+    padding-right: 10vw;
+    padding-left: 10vw;
+}
+
+#movieCardsContainer{
+    /* display: flex;
+    flex-direction: column;
+    margin: 3vh 10vw;
+    row-gap: 3vh; */
+
+    display: grid;
+    grid-template-columns: auto auto;
+    row-gap: 3vw;
+    column-gap: 3vw;
+    justify-content: center;
+}
+
+.movieCard{
+    display: flex;
+    flex-direction: column;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    padding: 15px;
+    row-gap: 15px;
+    border: 2px solid rgb(102, 102, 102);
+    width: 36vw;
+}
+
+.movieCard .movieContentWrapper, .movieCard .buy, .movieCard .release{
+    display: flex;
+    flex-direction: row;
+    column-gap: 15px;
+}
+
+.movieCard .buy, .movieCard .release{
+    align-items: center;
+    justify-content: space-between;
+    padding: 2% 4%;
+}
+
+.movieCard .buy{
+    background-color: #0c0c0c;
+    border-radius: inherit;
+}
+
+.movieCard .release h1, .movieCard .release p, .movieCard .buy{
+    /* font-size: 2vw;
+    font-size: 2%; */
+}
+
+.movieCard .movieContentWrapper img{
+    width: 200px;
+    width: 20%;
+    border-radius: 10px;
+    border: 1px solid #ffffff36;
+}
+
+.movieCard .movieContentWrapper .content{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    row-gap: 15px;
+    justify-content: space-between;
+    position: relative;
+    padding: 2%;
+}
+
+.movieCard .movieContentWrapper .content .btn{
+    text-align: center;
+}
+
+.movieCard .movieContentWrapper .content .rating{
+    /* font-size: 2vw;
+    font-size: 2%; */
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}
+
+.movieCard .movieContentWrapper .content .rating i{
+    color: gold;
+}
+
+.movieCard .movieContentWrapper .content .title{
+    /* font-size: 2.8vw;
+    font-size: 2.8%; */
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.movieCard .movieContentWrapper .content .detailsRow{
+    /* font-size: 2vw;
+    font-size: 2%; */
+    display: flex;
+    flex-direction: row;
+    /* align-items: center; */
+    column-gap: 3%;
+    font-size: 0.9rem;
+}
+.movieCard .movieContentWrapper .content .detailsRow .heading{
+    color: #ffffffbf;
+}
+.movieCard .movieContentWrapper .content .detailsRow .text{
+    
+}
+

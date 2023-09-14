@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Movie-Admin{% endblock title %}
+
+{% block desc %}Add a new movie in the database{% endblock desc %}
+
+{% block css %}
+
+<style>
+
+main{
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 5vw;
+}
+
+.left{
+    /* width: 50%; */
+    display: inherit;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.left img{
+    width: 35vw;
+}
+
+.right{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* width: 50%; */
+    row-gap: 5vh;
+}
+
+.right h1{
+    font-size: 3vw;
+}
+
+form{
+    background-color: white;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    width: 90%;
+    border-radius: 8px;
+}
+
+form p{
+    align-self: center;
+}
+
+form p span{
+    color: gray;
+}
+
+form p a{
+    color: blue;
+    text-decoration: none;
+}
+
+.inputFieldWrapper{
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #c5c5c5;
+    border-radius: 8px;
+    column-gap: 20px;
+}
+
+.inputFieldWrapper i{
+    color: #1b1a6a;
+}
+
+.inputField{
+    background: none;
+    outline: none;
+    border: none;
+    width: 100%;
+    color: black;
+}
+
+select.inputField option{
+    color: black;
+}
+
+</style>
+
+{% endblock css %}
+
+{% block nav %}{% endblock nav %}
+
+{% block header %}{% endblock header %}
+
+{% block main %}
+
+<main>
+    <!-- <section class="left">
+    
+    <img src="/static/img/logos/Png/Influx global logo Final Files-07.png" alt="">
+
+    </section> -->
+    <section class="right">
+    <!-- <h1 class="textCenter"> -->
+    <!-- <a style="text-decoration: none;" href="/">InfluxGlobal.com</a> -->
+    <!-- </h1> -->
+    <h1 class="textCenter">Add new movie</h1>
+    <p>Take any movie ID from IMDB website an give here</p>
+        <form action="" method="post" id="form">
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-hashtag"></i>
+                <input class="inputField inputFieldJs" type="text" placeholder="IMDB Movie ID" required id="referalCodeInput" name="movieId">
+            </div>
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-globe"></i>
+                <select class="inputField" name="placement" id="countryCodeSelector" required>
+                    <option value="" class="selected" selected>Select movie category</option>
+                    <option value="24 hour">24 Hour</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="pre sale">Pre Sale</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btnNormal" id="submitBtn">Add Movie</button>
+            <!-- <p><span>Already Registered? <a href="/login">Login Here</a></span></p> -->
+        </form>
+    </section>
+</main>
+
+{% endblock main %}
+
+{% block footer %}{% endblock footer %}
+
+{% block js %}
+
+<script>
+
+let pageForm = document.getElementById('form');
+let countryCodeSelector = document.getElementById('countryCodeSelector');
+
+let referalCodeInput = document.getElementById('referalCodeInput');
+
+let submitBtn = document.getElementById('submitBtn');
+
+countryCodeSelector.setCustomValidity("Please select a country");
+
+let inputsList = [referalCodeInput]
+
+function isAllFieldsFilled(){
+    let response = true
+    inputsList.forEach(inputElement => {
+        if(!(inputElement.checkValidity())){
+            console.log('1st if of isallfiledsfilled')
+            inputElement.reportValidity();
+            response = false
+        }
+    });
+    if (countryCodeSelector.value == ""){
+        console.log('2nd if of isallfiledsfilled')
+        window.alert("Please select movie category")
+        response = false
+    }
+    return response
+}
+
+function validateForm(){
+    if (isAllFieldsFilled()) {
+        return true
+    } else {
+        return false
+    }
+}
+
+submitBtn.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if (validateForm()){
+        // window.alert('Form sumbited without any error');
+        pageForm.submit();
+    }
+    // else{
+    //     window.alert('Form not submitted successfully');
+    // }
+})
+
+</script>
+
+{% endblock js %}
