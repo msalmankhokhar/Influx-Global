@@ -25,7 +25,7 @@ nav{
     /* justify-content: space-around; */
     row-gap: 3vh;
     padding: 5vh 0px;
-    position: absolute;
+    position: fixed;
     top: 0px;
     left: -250px;
     transition: 0.5s;

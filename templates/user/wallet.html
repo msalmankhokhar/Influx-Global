@@ -4,49 +4,78 @@
 
 {% block css %}
 <style>
-#walletContainer{
-    /* border: 1px solid #ffffff61; */
-    margin: 5vw;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    row-gap: 30px;
-}
+    #walletContainer {
+        /* border: 1px solid #ffffff61; */
+        /* margin: 5vw; */
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
+    }
 
-#balanceContainer{
-    background: linear-gradient(90deg, #180848,#06101c,#180848);
-    padding: inherit;
-    border-radius: inherit;
-    display: flex;
-    /* flex-direction: column; */
-    /* align-items: center; */
-    justify-content: space-around;
-}
+    .walletMain{
+        background: linear-gradient(90deg, #180848, #06101c, #180848);
+        display: flex;
+        flex-direction: column;
+        border-radius: 15px;
+        padding: 35px;
+        align-items: center;
+        row-gap: 10px;
+    }
 
-#balanceContainer .heading{
-    font-size: 0.9rem;
-    
-}
-#balanceContainer .text{
-    font-weight: bold;
-    font-size: 1.2rem;    
-}
+    #balanceContainer {
+        padding: inherit;
+        display: flex;
+        /* flex-direction: column; */
+        /* align-items: center; */
+        justify-content: space-around;
+        padding: 30px;
+        align-self: flex-start;
+        column-gap: 15px;
+    }
 
-#walletContainer .actions{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    column-gap: 10px;
-}
+    #balanceContainer .heading {
+        font-size: 0.9rem;
 
-#walletContainer .actions .btn{
-    border: 1px solid #ffffff61;
-    border-radius: 5px;
-}
-#walletContainer .actions .btn:hover{
-    border-color: orange;
-    background-color: orange;
-}
+    }
+
+    #balanceContainer .text {
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    #walletContainer .actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        column-gap: 10px;
+    }
+
+    #walletContainer .actions .btn {
+        border: 1px solid #ffffff61;
+        border-radius: 5px;
+    }
+
+    #walletContainer .actions .btn:hover {
+        border-color: orange;
+        background-color: orange;
+    }
+
+    span strong {
+        color: yellow;
+        margin-left: 20px;
+    }
+
+    .infoBlock {
+        padding: 10px 15px;
+        background-color: #003e6a;
+        border-radius: 30px;
+    }
+    @media screen and (max-width: 550px) {
+        span strong{
+            margin: 0px;
+        }
+    }
 </style>
 {% endblock css %}
 
@@ -54,20 +83,29 @@
 
 <div class="container" id="walletContainer">
 
-<div id="balanceContainer">
-        <span class="heading">Your Balance</span>
-        <span class="text">&dollar; {{user.wallet_balance}}</span>
-</div>
+    <div class="walletMain">
+        <div id="balanceContainer">
+            <span class="heading">Your Balance</span>
+            <span class="text">&dollar; {{user.wallet_balance}}</span>
+        </div>
 
-<div class="actions">
-    <a href="/user/recharge" class="btn btnWithIcon">
-        <i class="fa-solid fa-coins"></i>
-        <span>Recharge</span>
-    <a href="" class="btn btnWithIcon">
-        <i class="fa-solid fa-money-bill-transfer"></i>
-        <span>Withdraw</span>
-    </a>
-</div>
+        <span class="infoBlock">
+            Today's Earning <strong>&dollar; {{user.today_earning}}</strong>
+        </span>
+        <span class="infoBlock">
+            Earning in this month <strong>&dollar; {{user.monthly_earning}}</strong>
+        </span>
+    </div>
+
+    <div class="actions">
+        <a href="/user/recharge" class="btn btnWithIcon">
+            <i class="fa-solid fa-coins"></i>
+            <span>Recharge</span>
+            <a href="" class="btn btnWithIcon">
+                <i class="fa-solid fa-money-bill-transfer"></i>
+                <span>Withdraw</span>
+            </a>
+    </div>
 
 </div>
 

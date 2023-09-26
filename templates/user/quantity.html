@@ -1,0 +1,186 @@
+{% extends 'user/home.html' %}
+
+{% block title %}Select Quantity{% endblock title %}
+
+{% block css %}
+<style>
+    #popUp{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 90vw;
+        margin: 10vh auto;
+    }
+    #popUpInner{
+        /* display: flex; */
+    }
+    #actions{
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .actions .btn{
+        padding: 10px;
+    }
+    .actions input{
+        background: none;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.349);
+        outline: none;
+        /* width: 30px; */
+    }
+    .detailsDiv{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2% 4%;
+    }
+
+    @media screen and (max-width: 608px){
+        .actions{
+            flex-direction: column;
+        }
+        #popUp{
+            flex-direction: column;
+            align-items: normal;
+            justify-content: normal;
+        }
+        #popUpInner{
+            width: 100%;
+        }
+        .movieCard{
+            /* width: 100%; */
+        }
+    }
+
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div id="popUp">
+    <div id="popUpInner">
+    <div class="movieCard">
+        <div class="movieContentWrapper">
+            <img src="{{movie['imgSrc']}}" alt="{{movie['title']}}">
+            <div class="content">
+                <div class="rating">
+                    <span>{{movie['rating']}}</span>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="title">{{movie['title']}}</p>
+                <p class="price detailsRow">
+                    <span class="heading">Ticket Price:</span>
+                    <span class="text">&dollar; {{ticket_price}}.00</span>
+                </p>
+                <!-- <p class="actors detailsRow">
+                    <span class="heading">Starcast:</span>
+                    <span class="text">{{movie['actors']}}</span>
+                </p> -->
+                <p class="actors detailsRow">
+                    <span class="heading">Category:</span>
+                    <span class="text">{{movie['placement']}}</span>
+                </p>
+            </div>
+        </div>
+
+        <hr>
+        <div class="release">
+            <p>Release Date:</p>
+            <p>{{movie['releaseDate']}}</p>
+        </div>
+        <div id="actions" class="actions">
+            <label for="quantityInput">No. of tickets to buy</label>
+            <div>
+                <button class="btn btnNormal" id="subsBtn">-</button>
+                <input type="number" name="quantity" id="quantityInput" min="1" value="1" required>
+                <button class="btn btnNormal" id="addBtn">+</button>
+            </div>
+        </div>
+        <div class="detailsDiv">
+            <p>Total Price:</p>
+            <p>&dollar; <span id="priceP"></span></p>
+        </div>
+        <div class="detailsDiv">
+            <p>Estimated per day profit:</p>
+            <p>&dollar; <span id="profitP"></span></p>
+        </div>
+        <a href="/user/buy_ticket?movie_id={{movie['id']}}&ticket_price={{ticket_price}}" class="btn btnNormal" id="confirmBtn">Confirm Purchase</a>
+    </div>
+</div>
+</div>
+
+{% endblock main %}
+
+{% block js %}
+<script>
+    let subsBtn = document.getElementById("subsBtn");
+    let addBtn = document.getElementById("addBtn");
+    let priceP = document.getElementById("priceP");
+    let profitP = document.getElementById("profitP");
+    let quantityInput = document.getElementById("quantityInput");
+    let ticket_price = {{ticket_price}};
+    let confirmBtn = document.getElementById("confirmBtn")
+    let userWalletBalance = {{ user.wallet_balance }}
+
+    function calculateTotalPrice(){
+        if(quantityInput.value > 0){
+            let total_purchase_value = ticket_price * quantityInput.value;
+            // let estimated_daily_profit = ticket_price * quantityInput.value;
+            priceP.innerText = total_purchase_value;
+            profitP.innerText = (({{daily_profit_percent}} / 100) * total_purchase_value).toFixed(2);
+        }
+        else{
+            priceP.innerText = 0;
+            profitP.innerText = 0;
+        }
+    }
+
+    quantityInput.addEventListener('change', (e)=>{
+        calculateTotalPrice();
+        console.log("value changed")
+    })
+
+    calculateTotalPrice()
+
+    addBtn.addEventListener('click', (e)=>{
+        quantityInput.stepUp(1);
+        calculateTotalPrice()
+    })
+    subsBtn.addEventListener('click', (e)=>{
+        quantityInput.stepDown(1);
+        calculateTotalPrice()
+    })
+
+    confirmBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        if (quantityInput.checkValidity()) {
+            if (quantityInput.value > 0) {
+                let time_now = new Date();
+                time_now_string = `${time_now.getFullYear()}-${time_now.getMonth() + 1}-${time_now.getDate()}-${time_now.getHours()}-${time_now.getMinutes()}`;
+                let buyTicketUrl = new URL(e.target.href);
+                buyTicketUrl.searchParams.append('tickets_purchased', quantityInput.value);
+                buyTicketUrl.searchParams.append('purchase_time', time_now_string);
+                let user_Confrim_purchase = window.confirm("Are you sure to proceed ?");
+                if(user_Confrim_purchase){
+                    if(userWalletBalance >= (ticket_price * quantityInput.value)){
+                        console.log("tickets purchased successfully")
+                        window.location.href = buyTicketUrl.href;
+                    }
+                    else{
+                        window.alert("You don't have enough balance in your wallet. Please recharge your wallet to buy tickets")
+                    }
+                }
+            }
+            else{
+                window.alert("Number of tickets cannot be less than 1")
+            }
+        }
+        else{
+            quantityInput.reportValidity();
+        }
+    })
+</script>
+{% endblock js %}

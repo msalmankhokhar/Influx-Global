@@ -12,9 +12,13 @@ nav{
     /* background-color: cadetblue; */
     /* background-color: #202020; */
     background-color: #001118;
-    position: sticky;
-    top: 0px;
+    background-color: #00192e;
+    position: fixed;
+    width: 100vw;
+    bottom: 0px;
     z-index: 1;
+    height: 13vh;
+    box-shadow: 1px 1px 10px black;
 }
 
 #navLogoLink{
@@ -46,27 +50,32 @@ nav{
     font-size: 1vw;
 }
 
+.navlinkContainer{
+    height: 100%;
+}
+
 .navlink.navlinkWithIcon{
     display: flex;
     flex-direction: column;
-    /* justify-content: center; */
+    justify-content: center;
     align-items: center;
     row-gap: 4px;
     height: 100%;
     width: 8vw;
+    height: 100%;
 }
 
 .navlink.navlinkWithIcon i{
     font-size: 2vw;
 }
 
-.navlink.navlinkWithIcon:hover *{
-    color: gold;
+.navlink.navlinkWithIcon:hover, .navlink.navlinkWithIcon.selected{
+    background-color: #003d68;
 }
 
 .container{
-    padding-top: 10vh;
-    padding-bottom: 10vh;
+    padding-top: 5vh;
+    padding-bottom: 20vh;
     padding-right: 10vw;
     padding-left: 10vw;
 }
@@ -84,15 +93,35 @@ nav{
     justify-content: center;
 }
 
+.categoryBtnsContainer{
+    display: flex;
+    padding: 25px;
+    column-gap: 10px;
+}
+
+.btn.btnTrans.movieCategoryBtn{
+    width: 100%;
+    border: none;
+    border-radius: 30px;
+    background: none;
+    border: 2px solid rgba(255, 255, 255, 0.26);
+}
+
+.btn.btnTrans.movieCategoryBtn.selected, .btn.btnTrans.movieCategoryBtn:hover{
+    background-color: #b37c00;
+    border-color: #b37c00;
+}
+
 .movieCard{
     display: flex;
     flex-direction: column;
-    background-color: #1e1e1e;
+    background-color: #090f25;
     border-radius: 10px;
     padding: 15px;
     row-gap: 15px;
-    border: 2px solid rgb(102, 102, 102);
+    /* border: 2px solid rgb(102, 102, 102); */
     width: 36vw;
+    box-shadow: 1px 1px 10px black;
 }
 
 .movieCard .movieContentWrapper, .movieCard .buy, .movieCard .release{
@@ -101,7 +130,7 @@ nav{
     column-gap: 15px;
 }
 
-.movieCard .buy, .movieCard .release{
+.movieCard .buy, .movieCard .release, .movieCard .actions{
     align-items: center;
     justify-content: space-between;
     padding: 2% 4%;
@@ -171,5 +200,105 @@ nav{
 }
 .movieCard .movieContentWrapper .content .detailsRow .text{
     
+}
+
+@media screen and (max-width: 1431px) {
+    #movieCardsContainer{
+        
+    }
+    .movieCard{
+        width: auto;
+    }
+    nav{
+        height: 5.5rem;
+        justify-content: normal;
+    }
+    .navlink{
+        font-size: 0.6rem;
+    }
+    .navlink.navlinkWithIcon{
+        width: 100%;
+    }
+    .navlink.navlinkWithIcon i{
+        font-size: 1rem;
+    }
+    #navLogo {
+        width: 5.5rem;
+    }
+    #navLogoLink{
+        margin: 0px 15px;
+    }
+}
+@media screen and (max-width: 1199px) {
+    #movieCardsContainer{
+        padding-left: 5vw;
+        padding-right: 5vw;
+    }
+    .movieCard .movieContentWrapper .content .rating{
+        position: static;
+        display: flex;
+        justify-content: flex-end;
+    }
+    .movieCard .movieContentWrapper img{
+        width: 25%;
+    }
+}
+@media screen and (max-width: 955px){
+    #movieCardsContainer{
+        justify-content: normal;
+        grid-template-columns: auto;
+        padding-left: 10vw;
+        padding-right: 10vw;
+    }
+}
+@media screen and (max-width: 550px) {
+    #movieCardsContainer{
+        padding-left: 3vw;
+        padding-right: 3vw;
+    }
+    #navLogoLink{
+        margin: 0px 5px;
+    }
+    .movieCard .buy{
+        flex-direction: column;
+        row-gap: 10px;
+        align-items: normal;
+    }
+    .movieCard .buy p{
+        align-self: center;
+    }
+    .movieCard .movieContentWrapper .content{
+        position: static;
+    }
+    .movieCard .movieContentWrapper .content .rating{
+        position: absolute;
+        left: 0px;
+        right: unset;
+    }
+    .movieCard .movieContentWrapper{
+        flex-direction: column;
+        position: relative;
+    }
+    .movieCard .movieContentWrapper img{
+        width: 30%;
+        align-self: end;
+    }
+    nav{
+        height: 4.5rem;
+        justify-content: normal;
+    }
+    .navlink{
+        font-size: 0.6rem;
+    }
+    .navlink.navlinkWithIcon{
+        width: 100%;
+    }
+    .navlink.navlinkWithIcon i{
+        font-size: 1rem;
+    }
+    #navLogo {
+        width: 4.5rem;
+    }
+
 }
 

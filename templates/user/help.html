@@ -1,0 +1,77 @@
+{% extends 'user/home.html' %}
+
+{% block title %}Help{% endblock title %}
+
+{% block css %}
+<style>
+    .container{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        /* align-items: center; */
+        row-gap: 5vh;
+    }
+
+    .btnWithIcon{
+        justify-content: normal;
+        font-size: 3rem;
+    }
+    .btnWithIcon span{
+        width: 100%;
+    }
+    .helpBtn{
+        text-decoration: none;
+        display: flex;
+        /* align-items: center; */
+        font-size: 3rem;
+        border: none;
+        border-radius: 70px;
+    }
+    .helpBtn span{
+        width: 100%;
+        text-align: center;
+        line-height: 0px;
+        padding: 20px;
+        align-self: center;
+    }
+    .helpBtn.tg{
+        background-color: #216ef2;
+    }
+    .helpBtn.line{
+        background-color: #1de203;
+    }
+    .helpBtn i{
+        background: white;
+        vertical-align: middle;
+        border-radius: inherit;
+    }
+    .helpBtn span,.helpBtn i{
+        padding: 4%;
+    }
+
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div class="container">
+    <h1 class="text" style="text-align: center;">
+        Contact us on Telegram or Line if you face any problems. Our support team will be available for your concern
+    </h1>
+    <div class="tg">
+        <a href="https://t.me/Influxglobal" class="helpBtn tg">
+            <i class="fa-brands fa-telegram" style="color: #216ef2;"></i>
+            <span>Telegram</span>
+        </a>
+    </div>
+    <div class="line">
+        <a href="#" class="helpBtn line">
+            <i class="fa-brands fa-line" style="color: #1de203;"></i>
+            <span>Line</span>
+        </a>
+    </div>
+</div>
+
+{% endblock main %}
+
+{% block js %}{% endblock js %}

@@ -1,0 +1,97 @@
+{% extends 'user/home.html' %}
+
+{% block title %}Orders{% endblock title %}
+
+{% block css %}
+<style>
+    #movieCardsContainer{
+        display: flex;
+        flex-direction: column;
+        row-gap: 3vh;
+    }
+    .movieCard{
+        width: auto;
+    }
+    .movieCard .movieContentWrapper img{
+        /* width: 20%; */
+        /* height: 100%; */
+    }
+    .movieCard .buy, .movieCard .release{
+        padding: 1% 2%;
+    }
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div class="container" id="movieCardsContainer">
+
+    {% if moviesList | length > 0 %}
+    {% for movie in moviesList %}
+    <div class="movieCard">
+
+        <div class="movieContentWrapper">
+            <img src="{{ get_movie_details_from_ID(movie['movie_id'])['imgSrc'] }}" alt="{{get_movie_details_from_ID(movie['movie_id'])['title']}}">
+        <div class="content">
+            <div class="rating">
+                <span>{{get_movie_details_from_ID(movie['movie_id'])['rating']}}</span>
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="title">{{get_movie_details_from_ID(movie['movie_id'])['title']}}</p>
+            
+            <p class="price detailsRow">
+                <span class="heading">Ticket Price:</span>
+                <span class="text">&dollar; {{priceDict[get_movie_details_from_ID(movie['movie_id'])['placement']]['price']}}.00</span></p>
+            <p class="actors detailsRow">
+                <span class="heading">Starcast:</span>
+                <span class="text">{{ get_movie_details_from_ID(movie['movie_id'])['actors'] }}</span></p>
+            <p class="actors detailsRow">
+                <span class="heading">Purchase time:</span>
+                <span class="text">{{ get_readable_date_string(movie['purchase_time']) }}</span></p>
+            <p class="actors detailsRow">
+                <span class="heading">End time:</span>
+                <span class="text">{{ get_readable_date_string(movie['end_time']) }}</span></p>
+
+            <p class="actors detailsRow">
+                <span class="heading">Estimated daily profit:</span>
+                <span class="text">&dollar; {{ movie['estimated_daily_profit'] }}</span></p>
+
+                {% if priceDict[get_movie_details_from_ID(movie['movie_id'])['placement']]['duration'] %}
+
+            <p class="actors detailsRow">
+                <span class="heading">Duration:</span>
+                <span class="text">{{ priceDict[get_movie_details_from_ID(movie['movie_id'])['placement']]['duration'] }}</span></p>
+                
+                {% else %}
+
+                <p class="actors detailsRow">
+                    <span class="heading">Duration:</span>
+                    <span class="text">Till release date</span></p>
+
+                {% endif %}
+        </div>
+    </div>
+
+    <div class="buy">
+        <p>Estimated profit per ticket: <span>{{priceDict[get_movie_details_from_ID(movie['movie_id'])['placement']]['profit']}}%</span></p>
+        <button class="btn btnTrans buyTicketBtn pendingBtn">Order {{ movie['status'] }}</button>
+    </div>
+
+    <hr>
+
+    <div class="release">
+        <p>Release Date:</p>
+        <p>{{  get_movie_details_from_ID(movie['movie_id'])['releaseDate']  }}</p>
+    </div>
+
+    </div>
+    {% endfor %}
+    {% else %}
+    <h1 style="text-align: center;">No orders yet. Purchase some movie tickets to show here</h1>
+    {% endif %}
+
+</div>
+
+{% endblock main %}
+
+{% block js %}{% endblock js %}

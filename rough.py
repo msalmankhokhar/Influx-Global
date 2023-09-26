@@ -1,6 +1,9 @@
-from phonenumbers import parse, geocoder, carrier, is_valid_number, is_possible_number
+from phonenumbers import parse, geocoder, carrier, is_valid_number, is_possible_number, country_code_for_region
 
-phoneNumber = parse("0372 7777 000", region="PK")
+expected_region = "BD"
+phoneNumber = parse("+92 318 6456552", _check_region=True)
+
+# print(country_code_for_region(expected_region))
 
 # formats:
 # +66 653520884
@@ -9,18 +12,19 @@ phoneNumber = parse("0372 7777 000", region="PK")
 # print(phoneNumber.country_code)
 # print(phoneNumber.national_number)
 
-Carrier = carrier.name_for_number(phoneNumber, 'en')
+# Carrier = carrier.name_for_number(phoneNumber, 'en')
 
-Region = geocoder.description_for_number(phoneNumber, 'en')
+# Region = geocoder.description_for_number(phoneNumber, 'en')
 
 # Validating a phone number
-valid = is_valid_number(phoneNumber)
+# valid = is_valid_number(phoneNumber)
   
 # Checking possibility of a number
-possible = is_possible_number(phoneNumber)
+# possible = is_possible_number(phoneNumber)
 
 # print(valid)
 # print(possible)
+# print(phoneNumber)
 
 from random import randint
 
@@ -86,10 +90,63 @@ payload = {
     "notify_time": "2023-09-13T14:57:46.8003133Z"
 }
 
-response = requests.post(url='http://localhost:5000/user/wallet/verify_recharge', json=payload)
+# response = requests.post(url='http://localhost:5000/user/wallet/verify_recharge', json=payload)
 
-print(response.text)
+# print(response.text)
 
 # ngrok_path = "C:\Windows\System32\\ngrok.exe"
 
 # print(ngrok_path)
+
+from datetime import datetime, timedelta
+from helper import raw_dateString_to_dateObj, get_readable_date_string, dateObj_to_raw_dateString, get_endTime_rawString
+# from apscheduler.schedulers.blocking import BlockingScheduler
+
+# scheduler = BlockingScheduler()
+
+# def test_func(name):
+#     print(name)
+
+# dateObj = raw_dateString_to_dateObj('2023-9-16-18-59')
+
+# scheduler.add_job(func=test_func, trigger='date', run_date=dateObj, args=['salman khokhar'], id=)
+# scheduler.start()
+# print(f'successfully set scheduler on {dateObj}')
+
+def movie_R_date_string_todate_obj(relaseDateString):
+    movieReleaseDateformat = "%d %b %Y"
+    dateObj = datetime.strptime(relaseDateString, movieReleaseDateformat)
+    return dateObj
+
+
+# print(movie_R_date_string_todate_obj("25 Jan 2008").date())
+
+# print(datetime.today())
+name = "salman"
+l = ["salman", "eman", "imran"]
+# # l.remove(name)
+# print(l[name])
+
+mydictList = [
+    {
+    "name" : "salman",
+    "class" : 9
+},
+    {
+    "name" : "imran",
+    "class" : 10
+}
+]
+
+list_of_names = [ d["name"] for d in mydictList ]
+
+# print(list_of_names)
+
+def generate_selfReferalCode(name):
+    name = name.strip().replace(" ", "_")
+    selfReferalCode = name.upper() + "_" + str(randint(111111, 999999))
+    return selfReferalCode
+
+name = "Salman Khokhar"
+
+print(generate_selfReferalCode(name))

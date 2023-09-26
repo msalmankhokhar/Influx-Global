@@ -12,7 +12,7 @@ body{
 }
 
 header{
-    height: 100vh;
+    /* height: 100vh; */
     /* background-color: rgba(0, 0, 0, 0.692); */
     /* background-image: url(/static/img/backgrounds/homebody.jpg); */
     background-image: url(https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80);
@@ -52,6 +52,7 @@ header{
 #headerContent .text h1{
     font-size: 4.5vw;
     font-weight: bold;
+    /* font-family: sans-serif; */
 }
 
 #headerContent .text p{
@@ -64,13 +65,60 @@ header{
     color: gold;
 }
 
+#navText{
+    display: none;
+    font-size: 2.2rem;
+    font-weight: bold;
+    font-family: sans-serif;
+    text-decoration: none;
+}
+
 nav{
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background-color: #00000057;
-    background-color: #00000059;
+    /* background-color: #00000057; */
+    /* background-color: #00000059; */
+    /* background-color: #000000b8; */
+    background: linear-gradient(45deg, black, transparent);
+    background-color: #02151e;
     backdrop-filter: blur(8px);
+}
+
+ul.sideBarMenu{
+    /* display: none; */
+    list-style: none;
+    background: linear-gradient(45deg, black, transparent);
+    background-color: #02151e;
+    width: 80vw;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+    padding-top: 20vh;
+    height: 100vh;
+    position: fixed;
+    top: 0px;
+    left: 0vw;
+    z-index: 10;
+    row-gap: 3vh;
+    transition: 0.3s;
+}
+
+ul.sideBarMenu.menuClose{
+    left: -80vw;
+}
+
+ul.sideBarMenu .btnsContainer{
+    display: inherit;
+    flex-direction: inherit;
+    row-gap: inherit;
+}
+
+#navMenuBtn{
+    display: none;
+    font-size: 1.7rem;
+    padding: 5px 13px;
 }
 
 #navLogo{
@@ -149,7 +197,9 @@ hr{
     align-self: end;
     align-items: center;
     padding: 35px;
-    background-color: darkcyan;
+    /* background-color: darkcyan; */
+    background: linear-gradient(45deg, black, transparent);
+    background-color: #02151e;
     border-radius: 35px 0px;
 }
 
@@ -181,6 +231,7 @@ hr{
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
+    column-gap: 15vw;
 }
 
 #earnSection .text{
@@ -225,15 +276,16 @@ p.copyRight{
 footer .content .footerSection{
     display: flex;
     flex-direction: column;
-    row-gap: 10px;
+    row-gap: 20px;
 }
 
-footer .content .footerSection.contact p{
+/* footer .content .footerSection.contact p{
     font-size: 1.7rem;
-}
+} */
 
 footer .content .footerSection h1{
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    text-align: center;
 }
 
 footer .content .footerSection.contact .content{
@@ -248,4 +300,76 @@ footer .content .footerSection.contact .content .btn{
 
 footer .content .footerSection.contact .content .btn i{
     font-size: 1.5rem;
+}
+
+@media screen and (max-width: 1068px) {
+    nav ul{
+        display: none;
+    }
+    #navLogo{
+        display: none;
+    }
+    #navText{
+        display: inline-block;
+    }
+    nav{
+        justify-content: space-between;
+        padding: 5vh 5vw;
+    }
+    #navMenuBtn{
+        display: inline-block;
+    }
+    #headerContent .text h1{
+        font-size: 3rem;
+    }
+    #headerContent .text p{
+        font-size: 1.35rem;
+    }
+    .sectionParaGraph{
+        font-size: 1rem;
+    }
+    .sectionHeading{
+        font-size: 3rem;
+    }
+    #introSection .content{
+        flex-direction: column;
+        row-gap: 50px;
+    }
+    #introSection .content .right{
+        align-self: normal;
+        align-items: normal;
+    }
+    #introSection .content .right .imgContainer{
+        display: flex;
+        justify-content: center;
+    }
+    #introSection .content .right .imgContainer img{
+        height: 30vw;
+    }
+    #earnSection .text .sectionParaGraph, .sectionParaGraph{
+        width: auto;
+        text-align: center;
+    }
+    #earnSection{
+        flex-direction: column;
+        row-gap: 50px;
+        padding-left: 5vw;
+        padding-right: 5vw;
+    }
+    #earnSection .text{
+        align-items: center;
+    }
+    footer{
+        padding: 5vh 5vw 5vh 5vw;
+    }
+}
+
+@media screen and (max-width: 481px) {
+    #headerContent .text .btnsContainer, #earnSection .text .btnsContainer{
+        row-gap: 5px;
+        flex-direction: column;
+    }
+    .sectionHeading{
+        font-size: 2.5rem;
+    }
 }

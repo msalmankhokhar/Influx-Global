@@ -20,12 +20,24 @@
 {% block css %}{% endblock css %}
 
 <body>
+    <ul class="sideBarMenu menuClose">
+        <li><a href="" class="navlink sideBarInnerItem">Home</a></li>
+        <!-- <li><a href="" class="navlink">About Us</a></li> -->
+        <li><a href="#footer" class="navlink sideBarInnerItem">Contact Us</a></li>
+        <div class="btnsContainer">
+            <a href="/login" class="btn btnNormal sideBarInnerItem">Log In</a>
+            <a href="/register" class="btn btnTrans sideBarInnerItem">Register</a>
+        </div>
+    </ul>
     {% block header %}
     <header>
         {% block nav %}
         <nav>
             <div id="NavlogoWrapper">
-                <img src="/static/img/logos/Png/Influx global logo Final Files-04.png" alt="" id="navLogo">
+                <!-- <img src="/static/img/logos/Png/Influx global logo Final Files-04.png" alt="" id="navLogo"> -->
+                <!-- <img src="{{ url_for('static', filename='img/logos/Png/Influx global logo Final Files-04.png') }}" alt="" id="navLogo"> -->
+                <img src="{{ url_for('static', filename='img/logos/Png/Influx-global-logo-Final-Files-04.png') }}" alt="" id="navLogo">
+                <a id="navText" href="/">Influx Global</a>
             </div>
             <ul>
                 <li><a href="" class="navlink">Home</a></li>
@@ -36,6 +48,9 @@
                     <a href="/register" class="btn btnTrans">Register</a>
                 </div>
             </ul>
+            <button id="navMenuBtn" href="" class="btn btnNormal">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </nav>
         {% endblock nav %}
 
@@ -45,13 +60,13 @@
                 <h1 class="textCenter">
                     Earn Profitable returns while supporting the movie industry
                 </h1>
-                <p class="textCenter"><span>Register Now</span> to get <span>$2 Bonus</span> on first recharge</p>
+                <p class="textCenter"><span>Register Now</span> to get <span>&dollar;2</span> Bonus on first recharge and free <span>&dollar;100</span> Signup reward</p>
                 <div class="btnsContainer">
-                    <a href="" class="btn btnNormal btnWithIcon">
+                    <a href="/register" class="btn btnNormal btnWithIcon">
                         <span>Start Now</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </a>
-                    <a href="" class="btn btnTrans">Learn More about our earning program</a>
+                    <a href="#earnSection" class="btn btnTrans">Learn More about our earning program</a>
                 </div>
             </div>
         </div>
@@ -65,7 +80,7 @@
                 <div class="left">
                     <h1 class="sectionHeading textCenter">Company Introduction</h1>
                     <div class="imgContainer">
-                        <img src="/static/img/logos/Png/Influx global logo Final Files-04.png" alt="">
+                        <img src="{{ url_for('static', filename='img/logos/Png/Influx-global-logo-Final-Files-04.png') }}" alt="">
                     </div>
                 </div>
                 <div class="right">
@@ -85,8 +100,7 @@
         <!-- <hr> -->
 
         <section id="earnSection" class="mainSection">
-            <h1 class="sectionHeading textCenter" style="text-align: right;">Earn Money with <br><span>Influx
-                    Global</span></h1>
+            <h1 class="sectionHeading textCenter">Earn Money with <span>Influx Global</span></h1>
             <div class="text">
                 <p class="sectionParaGraph customFontSize">Influx Global has partnerships with movie theaters around the
                     world. Users can purchase pre-sale movie tickets and daily movie tickets through the Influx Global
@@ -109,10 +123,10 @@
         <div class="content">
             <div class="footerSection contact">
                 <!-- <h1>Contact Us</h1> -->
-                <p>Contact us on Telegram for any queries</p>
+                <h1>Contact us on Telegram for any queries</h1>
                 <div class="content">
                     <div>
-                        <a class="btn btnWithIcon" href="">
+                        <a class="btn btnWithIcon" target="_blank" href="https://t.me/Influxglobal">
                             <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-telegram" viewBox="0 0 16 16">
                                 <path
@@ -134,6 +148,21 @@
 </body>
 <script src="https://kit.fontawesome.com/7d3f73a100.js" crossorigin="anonymous"></script>
 <script src="/static/js/script.js"></script>
-{% block js %}{% endblock js %}
+<script>
+    let menuBtn = document.getElementById("navMenuBtn");
+    let menuUl = document.querySelector("ul.sideBarMenu");
+    let sideBarInnerItemList = document.querySelectorAll(".sideBarInnerItem");
+    menuBtn.addEventListener('click', (e)=>{
+        menuUl.classList.toggle('menuClose');
+    })
+
+    sideBarInnerItemList.forEach(element => {
+        element.addEventListener('click', (e)=>{
+        menuUl.classList.toggle('menuClose');
+    })
+    });
+</script>
+{% block js %}
+{% endblock js %}
 
 </html>

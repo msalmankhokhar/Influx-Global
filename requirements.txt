@@ -1,0 +1,12 @@
+alembic
+APScheduler
+Flask
+Flask_APScheduler
+Flask_Migrate
+flask_ngrok
+flask_sqlalchemy
+phonenumbers
+Requests
+SQLAlchemy
+twilio
+unipayment

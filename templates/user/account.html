@@ -1,0 +1,181 @@
+{% extends 'user/home.html' %}
+
+{% block title %}Account{% endblock title %}
+
+{% block css %}
+<style>
+    #accountContainer {
+        /* border: 1px solid #ffffff61; */
+        /* margin: 5vw; */
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        row-gap: 30px;
+        /* background: linear-gradient(90deg, #180848, #06101c, #180848); */
+    }
+
+    span strong {
+        color: yellow;
+        margin-left: 20px;
+    }
+
+    .userId {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+    }
+
+    .level {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+
+    #profileContainer {
+        position: relative;
+        background: linear-gradient(90deg, #180848, #06101c, #180848);
+        padding: inherit;
+        border-radius: inherit;
+        display: flex;
+        /* flex-direction: column; */
+        /* align-items: center; */
+        justify-content: center;
+        column-gap: 15%;
+    }
+
+    .profileSection {
+        display: flex;
+        flex-direction: column;
+        row-gap: 2vh;
+        align-items: center;
+    }
+
+    .profilePicWrapper {
+        border-radius: 100%;
+        background-color: #0a4c9f;
+        padding: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 10vw;
+        height: 10vw;
+    }
+
+    .profilePicWrapper span {
+        font-weight: bold;
+        font-size: 3rem;
+    }
+
+    .levelSection {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        row-gap: 2vh;
+        justify-content: center;
+    }
+
+    .levelSection p {
+        text-align: center;
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+
+    .infoBlock {
+        padding: 10px 15px;
+        background-color: #003e6a;
+        border-radius: 30px;
+    }
+
+    .levelSection .level {
+        align-self: center;
+    }
+
+    #accountContainer .actions {
+        display: flex;
+        flex-direction: column;
+        /* align-items: center;
+    justify-content: center;
+    column-gap: 10px; */
+    }
+
+    #accountContainer .actions .btn {
+        border: 1px solid #ffffff61;
+        border-radius: 5px;
+    }
+
+    #accountContainer .actions .btn:hover {
+        border-color: orange;
+        background-color: orange;
+    }
+
+    #accountContainer .actions .btn.btnWithIcon {
+        justify-content: space-around;
+        flex-direction: row-reverse;
+    }
+
+    @media screen and (max-width: 1431px) {
+        #profileContainer div{
+            margin: 15px 0px ;
+        }
+        .profilePicWrapper{
+            width: 120px;
+            height: 120px;
+        }
+        span.name{
+            text-align: center;
+        }
+    }
+    @media screen and (max-width: 608px) {
+        #profileContainer{
+            flex-direction: column;
+            row-gap: 15px;
+        }
+        .level{
+            top: unset;
+            bottom: 20px;
+        }
+    }
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div class="container" id="accountContainer">
+
+    <div id="profileContainer">
+        <div class="profileSection">
+            <span class="userId infoBlock">User Id {{user.user_id}}</span>
+            <div class="profilePicWrapper">
+                <span>{{ user.name[0] }}</span>
+            </div>
+            <span class="name">{{user.name}}</span>
+        </div>
+        <div class="levelSection">
+            <span class="level infoBlock">Level VIP {{user.level}}</span>
+            <span class="">Total earning <strong>&dollar; {{user.overall_earning}}</strong></span>
+            <span class="">Overall Deposit <strong>&dollar; {{user.overall_deposit}}</strong></span>
+            <span class="">Total Referals <strong>{{user.overall_referals}}</strong></span>
+            <p>{{level_upgrade_string}}</p>
+        </div>
+        
+    </div>
+    <div class="referalCodeWrapper levelSection">
+        <span class="infoBlock">
+            Referal Code <strong>{{user.selfReferalCode}}</strong>
+        </span>
+        <p>When your friends register using your referal code you will get 10% or their earnings</p>
+    </div>
+
+    <!-- <div class="actions">
+    <a href="/user/recharge" class="btn btnWithIcon">
+        <i class="fa-solid fa-arrow-right"></i>
+        <span>Recharge</span>
+    <a href="" class="btn btnWithIcon">
+        <i class="fa-solid fa-arrow-right"></i>
+        <span>Withdraw</span>
+    </a>
+</div> -->
+
+</div>
+
+{% endblock main %}

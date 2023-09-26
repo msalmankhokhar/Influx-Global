@@ -35,6 +35,7 @@ a.navlink{
     padding: 13px;
     border-radius: 5px;
     font-weight: bold;
+    text-align: center;
 }
 
 .btnWithIcon{

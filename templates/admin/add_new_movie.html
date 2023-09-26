@@ -110,17 +110,21 @@ select.inputField option{
     <!-- <a style="text-decoration: none;" href="/">InfluxGlobal.com</a> -->
     <!-- </h1> -->
     <h1 class="textCenter">Add new movie</h1>
-    <p>Take any movie ID from IMDB website an give here</p>
+    <p>Get any movie ID from <a target="_blank" style="color: rgb(0, 162, 255);" href="https://www.imdb.com/">imdb.com</a> and paste below</p>
         <form action="" method="post" id="form">
             <div class="inputFieldWrapper">
                 <i class="fa-solid fa-hashtag"></i>
                 <input class="inputField inputFieldJs" type="text" placeholder="IMDB Movie ID" required id="referalCodeInput" name="movieId">
             </div>
             <div class="inputFieldWrapper">
+                <i class="fa-solid fa-ticket"></i>
+                <input class="inputField inputFieldJs" type="number" placeholder="Number of Tickets" required id="noOfTicketsInput" name="no_of_tickets" min="1" value="100">
+            </div>
+            <div class="inputFieldWrapper">
                 <i class="fa-solid fa-globe"></i>
                 <select class="inputField" name="placement" id="countryCodeSelector" required>
-                    <option value="" class="selected" selected>Select movie category</option>
-                    <option value="24 hour">24 Hour</option>
+                    <option value="" class="selected">Select movie category</option>
+                    <option value="24 hour" selected>24 Hour</option>
                     <option value="weekly">Weekly</option>
                     <option value="pre sale">Pre Sale</option>
                 </select>
@@ -143,12 +147,13 @@ let pageForm = document.getElementById('form');
 let countryCodeSelector = document.getElementById('countryCodeSelector');
 
 let referalCodeInput = document.getElementById('referalCodeInput');
+let noOfTicketsInput = document.getElementById('noOfTicketsInput');
 
 let submitBtn = document.getElementById('submitBtn');
 
 countryCodeSelector.setCustomValidity("Please select a country");
 
-let inputsList = [referalCodeInput]
+let inputsList = [referalCodeInput, noOfTicketsInput]
 
 function isAllFieldsFilled(){
     let response = true
