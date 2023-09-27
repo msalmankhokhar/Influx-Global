@@ -17,6 +17,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 app = Flask(__name__)
 # run_with_ngrok(app)
 app.secret_key = 'salman khokhar'
+app_restarted = True
+
+# app_settings = json.load(open("settings.json", "r"))
+app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
 
 # setting up database configration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
@@ -77,6 +81,7 @@ class movies(db.Model):
     title = db.Column(db.String, nullable=True, unique=False)
     placement = db.Column(db.String(50), nullable=False, unique=False)
     no_of_tickets = db.Column(db.Integer, nullable=True, unique=False)
+    img_src = db.Column(db.String, nullable=True, unique=False)
 
 # Command for database migrations and commit
 # flask --app backend db migrate
@@ -94,7 +99,11 @@ def get_movie_details_from_ID(movie_id):
     movieRating = movieDetailsJson["imdbRating"]
     movieActors = movieDetailsJson["Actors"]
     movieRelease = movieDetailsJson["Released"]
-    movieImgSrc = get_movie_img_src(movie_id_number=movie.imdb_movie_id)
+    # movieImgSrc = get_movie_img_src(movie_id_number=movie.imdb_movie_id)
+    if movie.img_src:
+        movieImgSrc = movie.img_src
+    else:
+        movieImgSrc = movieDetailsJson["Poster"]
     movieObj = {
         "id" : movie.imdb_movie_id,
         "imgSrc" : movieImgSrc,
@@ -113,7 +122,11 @@ def generate_movie_details_obj(movie):
     movieRating = movieDetailsJson["imdbRating"]
     movieActors = movieDetailsJson["Actors"]
     movieRelease = movieDetailsJson["Released"]
-    movieImgSrc = get_movie_img_src(movie_id_number=movie.imdb_movie_id)
+    # movieImgSrc = get_movie_img_src(movie_id_number=movie.imdb_movie_id)
+    if movie.img_src:
+        movieImgSrc = movie.img_src
+    else:
+        movieImgSrc = movieDetailsJson["Poster"]
     movieObj = {
         "id" : movie.imdb_movie_id,
         "imgSrc" : movieImgSrc,
@@ -139,6 +152,11 @@ def get_movies_list(placement=False):
 
 @app.route("/", methods=["GET"])
 def home():
+    global app_restarted
+    if app_restarted == True:
+        if "user" in session:
+            session.pop("user")
+        app_restarted = False
     if request.method == "GET":
         if "user" in session:
             return redirect("/user")
@@ -345,7 +363,20 @@ def user_account():
                 return redirect("/")
         else:
             return redirect("/")
-        
+def filteredOrderedMoviesList(moviesList):
+    moviesListFiltered = [ e for e in moviesList if movies.query.filter_by(imdb_movie_id=e["movie_id"]).first() != None ]
+    if len(moviesListFiltered) < len(moviesList):
+        return {
+            "list" : moviesListFiltered,
+            "should_update_database" : True
+        }
+    else:
+        return {
+            "list" : moviesListFiltered,
+            "should_update_database" : False
+        }
+
+
 @app.route("/user/orders", methods=["GET"])
 def user_orders():
     if request.method == "GET":
@@ -354,13 +385,19 @@ def user_orders():
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
                 moviesList = json.loads(selected_user.purchased_tickets)
+                # moviesListFiltered = [ e for e in json.loads(selected_user.purchased_tickets) if movies.query.filter_by(imdb_movie_id=e["movie_id"]).first() != None ]
+                moviesListFilteredDict = filteredOrderedMoviesList(moviesList)
+                moviesListFiltered = moviesListFilteredDict["list"]
+                if moviesListFilteredDict["should_update_database"]:
+                    selected_user.purchased_tickets = json.dumps(moviesListFiltered)
+                    db.session.commit()
                 user_level = levels.query.filter_by(level_number=selected_user.level).first()
                 priceDict = {
     "24 hour": {"price":3, "profit":user_level.daily_ticket_profit, "duration": "24 Hours", "duration_days":1},
     "weekly": {"price":5, "profit":user_level.weekly_ticket_profit, "duration": "1 week (7 days)", "duration_days":7},
     "pre sale": {"price":5, "profit":user_level.presale_ticket_profit, "duration": "1 month", "duration_days":30}
     }
-                return render_template("user/orders.html", user=selected_user, moviesList=moviesList, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders")
+                return render_template("user/orders.html", user=selected_user, moviesList=moviesListFiltered, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders")
             else:
                 session.pop("user")
                 return redirect("/")
@@ -646,10 +683,48 @@ def register():
         else:
             return "phone number is invalid"
 
+@app.route("/admin", methods=["GET"])
+def admin():
+    global app_restarted
+    if app_restarted == True:
+        if "adminuser" in session:
+            session.pop("adminuser")
+        app_restarted = False
+    if request.method == "GET":
+        if "adminuser" in session:
+            return redirect("/admin/all_movies")
+        else:
+            return redirect("/admin/login")
+    
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "GET":
+        if "adminuser" not in session:
+            return render_template("/admin/login.html")
+        else:
+            return redirect("/admin")
+    elif request.method == "POST":
+        password = request.form.get("password")
+        if password == app_settings["adminPassword"]:
+            session["adminuser"] = True
+            return redirect("/admin")
+        else:
+            return "<h1>Wrong password try Again</h1>"
+
+@app.route("/admin/logout", methods=["GET"])
+def admin_logout():
+    if request.method == "GET":
+        if "adminuser" in session:
+            session.pop("adminuser")
+            return redirect("/admin")
+
 @app.route("/admin/add_new_user", methods=["GET", "POST"])
 def add_user_mannaul():
     if request.method == "GET":
-        return render_template("add_new_user.html", wallet_balance_field=True)
+        if "adminuser" not in session:
+            return render_template("add_new_user.html", wallet_balance_field=True)
+        else:
+            return redirect("/admin/login")
     elif request.method == "POST":
         name = request.form.get('name')
         wallet_balance = request.form.get('wallet_balance')
@@ -701,42 +776,52 @@ def add_user_mannaul():
                 return f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number"
         else:
             return "phone number is invalid"
-@app.route("/admin", methods=["GET"])
-def admin():
-    if request.method == "GET":
-        return redirect("/admin/all_movies")
     
 @app.route("/admin/all_movies", methods=["GET"])
 def admin_all_movies():
     if request.method == "GET":
-        moviesList = get_movies_list()
-        return render_template('admin/movies.html', moviesList=moviesList)
+        if "adminuser" in session:
+            moviesList = get_movies_list()
+            return render_template('admin/movies.html', moviesList=moviesList)
+        else:
+            return redirect("/admin/login")
     
 @app.route("/admin/all_users", methods=["GET"])
 def admin_all_users():
     if request.method == "GET":
-        usersList = users.query.all()
-        return render_template('admin/users.html', usersList=usersList)
+        if "adminuser" in session:
+            usersList = users.query.all()
+            return render_template('admin/users.html', usersList=usersList)
+        else:
+            return redirect("/admin/login")
     
 @app.route("/admin/all_levels", methods=["GET"])
 def admin_all_levels():
     if request.method == "GET":
-        levelList = levels.query.all()
-        return render_template('admin/levels.html', levelList=levelList)
+        if "adminuser" in session:
+            levelList = levels.query.all()
+            return render_template('admin/levels.html', levelList=levelList)
+        else:
+            return redirect("/admin/login")
 
 @app.route("/admin/add_new_movie", methods=["GET", "POST"])
 def admin_add_new_movie():
     if request.method == "GET":
-        return render_template('admin/add_new_movie.html')
+        if "adminuser" in session:
+            return render_template('admin/add_new_movie.html')
+        else:
+            return redirect("/admin/login")
     elif request.method == "POST":
         movieId = request.form.get('movieId')
         placement = request.form.get('placement')
         no_of_tickets = int(request.form.get('no_of_tickets'))
-
+        img_src = request.form.get('img_src')
         movieDetaisJSON = get_movie_details(movie_id_number=movieId)
         title = f'{movieDetaisJSON["Title"]} ({movieDetaisJSON["Year"]})'
 
         new_movie = movies(title=title, imdb_movie_id=movieId, placement=placement, no_of_tickets=no_of_tickets)
+        if img_src and img_src != "":
+            new_movie.img_src = img_src
         db.session.add(new_movie)
         db.session.commit()
         return redirect("/admin")
@@ -745,12 +830,20 @@ def admin_add_new_movie():
 def admin_edit_movie(movieId):
     selected_movie = movies.query.filter_by(imdb_movie_id=movieId).first()
     if request.method == "GET":
-        return render_template("admin/edit_movie.html", movie=selected_movie)
+        if "adminuser" in session:
+            return render_template("admin/edit_movie.html", movie=selected_movie)
+        else:
+            return redirect("/admin/login")
     elif request.method == "POST":
         placement = request.form.get('placement')
+        img_src = request.form.get('img_src')
         no_of_tickets = int(request.form.get('no_of_tickets'))
 
         selected_movie.placement = placement
+        if img_src and img_src != "":
+            selected_movie.img_src = img_src
+        else:
+            selected_movie.img_src = None
         selected_movie.no_of_tickets = no_of_tickets
         db.session.commit()
         return redirect("/admin")
@@ -758,24 +851,33 @@ def admin_edit_movie(movieId):
 @app.route("/admin/delete_movie/<string:movieId>", methods=["GET"])
 def admin_delete_movie(movieId):
     if request.method == "GET":
-        selected_movie = movies.query.filter_by(imdb_movie_id=movieId).first()
-        db.session.delete(selected_movie)
-        db.session.commit()
-        return redirect('/admin')
+        if "adminuser" in session:
+            selected_movie = movies.query.filter_by(imdb_movie_id=movieId).first()
+            db.session.delete(selected_movie)
+            db.session.commit()
+            return redirect('/admin')
+        else:
+            return redirect("/admin/login")
     
 @app.route("/admin/delete_user/<string:userId>", methods=["GET"])
 def admin_delete_user(userId):
     if request.method == "GET":
-        selected_user = users.query.filter_by(user_id=userId).first()
-        db.session.delete(selected_user)
-        db.session.commit()
-        return redirect('/admin/all_users')
+        if "adminuser" in session:
+            selected_user = users.query.filter_by(user_id=userId).first()
+            db.session.delete(selected_user)
+            db.session.commit()
+            return redirect('/admin/all_users')
+        else:
+            return redirect("/admin/login")
     
 @app.route("/admin/add_wallet_balance/<string:userId>", methods=["GET", "POST"])
 def add_wallet_balance(userId):
     selected_user = users.query.filter_by(user_id=userId).first()
     if request.method == "GET":
-        return render_template("admin/add_wallet_balance.html", user=selected_user)
+        if "adminuser" in session:
+            return render_template("admin/add_wallet_balance.html", user=selected_user)
+        else:
+            return redirect("/admin/login")
     elif request.method == "POST":
         added_wallet_balance = int(request.form.get("added_wallet_balance"))
         selected_user.wallet_balance += added_wallet_balance

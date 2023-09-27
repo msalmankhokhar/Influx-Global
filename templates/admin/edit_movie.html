@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Add New Movie-Admin{% endblock title %}
+{% block title %}Edit Movie - Admin{% endblock title %}
 
 {% block desc %}Add a new movie in the database{% endblock desc %}
 
@@ -130,7 +130,16 @@ select.inputField option{
                     <option class="movieCategoryOption" value="pre sale">Pre Sale</option>
                 </select>
             </div>
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-link"></i>
+                {% if movie.img_src == None %}
+                <input class="inputField inputFieldJs" type="text" placeholder="Image link (optional)" id="imgSrcInput" name="img_src">
+                {% else %}
+                <input class="inputField inputFieldJs" type="text" placeholder="Image link (optional)" id="imgSrcInput" name="img_src" value="{{movie.img_src}}">
+                {% endif %}
+            </div>
             <button type="submit" class="btn btnNormal" id="submitBtn">Save</button>
+            <a href="/admin/all_movies" class="btn btnTrans black" id="submitBtn">Cancel</a>
             <!-- <p><span>Already Registered? <a href="/login">Login Here</a></span></p> -->
         </form>
     </section>

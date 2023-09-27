@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Add New Movie-Admin{% endblock title %}
+{% block title %}Edit Movie - Admin{% endblock title %}
 
 {% block desc %}Add a new movie in the database{% endblock desc %}
 
@@ -128,6 +128,10 @@ select.inputField option{
                     <option value="weekly">Weekly</option>
                     <option value="pre sale">Pre Sale</option>
                 </select>
+            </div>
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-link"></i>
+                <input class="inputField inputFieldJs" type="text" placeholder="Custom Image link" id="imgSrcInput" name="img_src">
             </div>
             <button type="submit" class="btn btnNormal" id="submitBtn">Add Movie</button>
             <!-- <p><span>Already Registered? <a href="/login">Login Here</a></span></p> -->

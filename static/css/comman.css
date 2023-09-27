@@ -56,8 +56,13 @@ a.navlink{
     border: 1px solid rgb(151, 151, 151);
 }
 
+.btn.btnTrans.black{
+    color: black;
+}
+
 .btn.btnTrans:hover{
     background-color: rgb(46, 46, 46);
     background-color: black;
     border-color: black;
+    color: white
 }

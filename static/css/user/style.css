@@ -148,9 +148,11 @@ nav{
 
 .movieCard .movieContentWrapper img{
     width: 200px;
-    width: 20%;
-    border-radius: 10px;
+    width: 30%;
+    border-radius: 7px;
     border: 1px solid #ffffff36;
+    /* border: 1px solid white; */
+    align-self: baseline;
 }
 
 .movieCard .movieContentWrapper .content{
