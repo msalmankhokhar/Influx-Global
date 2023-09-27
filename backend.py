@@ -19,8 +19,8 @@ app = Flask(__name__)
 app.secret_key = 'salman khokhar'
 app_restarted = True
 
-# app_settings = json.load(open("settings.json", "r"))
-app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
+app_settings = json.load(open("settings.json", "r"))
+# app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
 
 # setting up database configration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'

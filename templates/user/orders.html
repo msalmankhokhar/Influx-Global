@@ -5,9 +5,9 @@
 {% block css %}
 <style>
     #movieCardsContainer{
-        display: flex;
+        /* display: flex;
         flex-direction: column;
-        row-gap: 3vh;
+        row-gap: 3vh; */
     }
     .movieCard{
         width: auto;
@@ -40,11 +40,14 @@
             <p class="title">{{get_movie_details_from_ID(movie['movie_id'])['title']}}</p>
             
             <p class="price detailsRow">
-                <span class="heading">Ticket Price:</span>
+                <span class="heading">Price per ticket:</span>
                 <span class="text">&dollar; {{priceDict[get_movie_details_from_ID(movie['movie_id'])['placement']]['price']}}.00</span></p>
             <p class="actors detailsRow">
-                <span class="heading">Starcast:</span>
-                <span class="text">{{ get_movie_details_from_ID(movie['movie_id'])['actors'] }}</span></p>
+                <span class="heading">Tickets Purchased:</span>
+                <span class="text">{{ movie['tickets_purchased'] }}</span></p>
+            <p class="actors detailsRow">
+                <span class="heading">Total Price:</span>
+                <span class="text">&dollar; {{ movie['total_purchase_value'] }}</span></p>
             <p class="actors detailsRow">
                 <span class="heading">Purchase time:</span>
                 <span class="text">{{ get_readable_date_string(movie['purchase_time']) }}</span></p>
@@ -66,7 +69,7 @@
 
                 <p class="actors detailsRow">
                     <span class="heading">Duration:</span>
-                    <span class="text">Till release date</span></p>
+                    <span class="text">Till movie release date</span></p>
 
                 {% endif %}
         </div>
