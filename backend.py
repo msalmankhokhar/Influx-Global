@@ -411,7 +411,7 @@ def user_wallet():
             user_id = session["user"]
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
-                return render_template("user/wallet.html", user=selected_user, currentPagespanText="Wallet")
+                return render_template("user/wallet.html", user=selected_user, currentPagespanText="Wallet", round=round)
             else:
                 session.pop("user")
                 return redirect("/")

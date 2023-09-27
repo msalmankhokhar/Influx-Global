@@ -149,4 +149,10 @@ def generate_selfReferalCode(name):
 
 name = "Salman Khokhar"
 
-print(generate_selfReferalCode(name))
+# print(generate_selfReferalCode(name))
+
+import math
+
+balance = 25.006
+
+print(round(float(balance), 2))
