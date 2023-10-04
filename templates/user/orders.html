@@ -49,6 +49,9 @@
                 <span class="heading">Total Price:</span>
                 <span class="text">&dollar; {{ movie['total_purchase_value'] }}</span></p>
             <p class="actors detailsRow">
+                <span class="heading">Purchased Using:</span>
+                <span class="text">{{ movie['purchased_using'] }}</span></p>
+            <p class="actors detailsRow">
                 <span class="heading">Purchase time:</span>
                 <span class="text">{{ get_readable_date_string(movie['purchase_time']) }}</span></p>
             <p class="actors detailsRow">
@@ -57,7 +60,7 @@
 
             <p class="actors detailsRow">
                 <span class="heading">Estimated daily profit:</span>
-                <span class="text">&dollar; {{ movie['estimated_daily_profit'] }}</span></p>
+                <span class="text">&dollar; {{ round(movie['estimated_daily_profit'], 2) }}</span></p>
 
                 {% if priceDict[get_movie_details_from_ID(movie['movie_id'])['placement']]['duration'] %}
 

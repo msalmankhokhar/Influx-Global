@@ -33,7 +33,8 @@
 
     #profileContainer {
         position: relative;
-        background: linear-gradient(90deg, #180848, #06101c, #180848);
+        /* background: linear-gradient(90deg, #180848, #06101c, #180848); */
+        background: linear-gradient(90deg, #483b08, #7d7e0a, #483b08);
         padding: inherit;
         border-radius: inherit;
         display: flex;
@@ -115,6 +116,16 @@
         flex-direction: row-reverse;
     }
 
+    #bottombtnsContainer{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        row-gap: 10px;
+        column-gap: 10px;
+        flex-wrap: wrap;
+    }
+
     @media screen and (max-width: 1431px) {
         #profileContainer div{
             margin: 15px 0px ;
@@ -165,7 +176,15 @@
         <span class="infoBlock">
             Referal Code <strong>{{user.selfReferalCode}}</strong>
         </span>
+        <button id="refLinKCopyBtn" class="btn btnTrans btnWithIcon">
+            <i class="fa-solid fa-copy"></i>
+            <span id="refLinKCopyBtnSpan">Copy Referal Link</span>
+        </button>
         <p>When your friends register using your referal code you will get 10% or their earnings</p>
+        <div id="bottombtnsContainer">
+            <a href="/user/wallet" class="btn btnNormal">Go to Wallet</a>
+            <a href="/logout/{{user.user_id}}" class="btn btnTrans">Log Out</a>
+        </div>
     </div>
 
     <!-- <div class="actions">
@@ -181,3 +200,22 @@
 </div>
 
 {% endblock main %}
+
+{% block js %}
+<script>
+    let refLinKCopyBtn = document.getElementById("refLinKCopyBtn");
+    let refLinKCopyBtnSpan = document.getElementById("refLinKCopyBtnSpan");
+    let referalLink = "https://www.influx-global.com/register?referalCode={{user.selfReferalCode}}"
+
+    refLinKCopyBtn.addEventListener('click', (e)=>{
+        navigator.clipboard.writeText(referalLink).then(()=>{
+            refLinKCopyBtnSpan.innerText = "Copied"
+            // window.alert("copied to clipboard")
+        }).catch(()=>{
+            refLinKCopyBtnSpan.innerText = "Not copied"
+            // window.alert("not copied")
+        });
+        
+    })
+</script>
+{% endblock js %}

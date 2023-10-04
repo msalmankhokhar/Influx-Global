@@ -8,14 +8,21 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 90vw;
-        margin: 10vh auto;
+        /* width: 90vw; */
+        /* margin: 10vh auto; */
     }
     #popUpInner{
         /* display: flex; */
     }
     #actions{
         display: flex;
+        justify-content: center;
+        column-gap: 30px;
+        flex-wrap: wrap;
+    }
+    #actions div{
+        display: flex;
+        align-items: center;
         justify-content: center;
         flex-wrap: wrap;
     }
@@ -41,6 +48,7 @@
     @media screen and (max-width: 608px){
         .actions{
             flex-direction: column;
+            align-items: center;
         }
         #popUp{
             flex-direction: column;
@@ -53,6 +61,10 @@
         .movieCard{
             /* width: 100%; */
         }
+        .container{
+            padding-left: 3vw;
+            padding-right: 3vw;
+        }
     }
 
 </style>
@@ -60,7 +72,7 @@
 
 {% block main %}
 
-<div id="popUp">
+<div id="popUp" class="container">
     <div id="popUpInner">
     <div class="movieCard">
         <div class="movieContentWrapper">
@@ -75,6 +87,7 @@
                     <span class="heading">Ticket Price:</span>
                     <span class="text">&dollar; {{ticket_price}}.00</span>
                 </p>
+
                 <!-- <p class="actors detailsRow">
                     <span class="heading">Starcast:</span>
                     <span class="text">{{movie['actors']}}</span>
@@ -91,11 +104,16 @@
             <p>Release Date:</p>
             <p>{{movie['releaseDate']}}</p>
         </div>
+        <p>Minimum purchase limit for pre sale movies is {{userLevel.minimum_presale_tickets_buy}} Tickets</p>
         <div id="actions" class="actions">
             <label for="quantityInput">No. of tickets to buy</label>
             <div>
                 <button class="btn btnNormal" id="subsBtn">-</button>
+                {% if movie['placement'] == 'pre sale' %}
+                <input type="number" name="quantity" id="quantityInput" min="{{userLevel.minimum_presale_tickets_buy}}" value="{{userLevel.minimum_presale_tickets_buy}}" required>
+                {% else %}
                 <input type="number" name="quantity" id="quantityInput" min="1" value="1" required>
+                {% endif %}
                 <button class="btn btnNormal" id="addBtn">+</button>
             </div>
         </div>
@@ -122,8 +140,18 @@
     let profitP = document.getElementById("profitP");
     let quantityInput = document.getElementById("quantityInput");
     let ticket_price = {{ticket_price}};
-    let confirmBtn = document.getElementById("confirmBtn")
-    let userWalletBalance = {{ user.wallet_balance }}
+    let confirmBtn = document.getElementById("confirmBtn");
+    let userWalletBalance = {{ user.wallet_balance }};
+    let userExperienceMoney;
+    {% if user.experience_money == None %}
+    userExperienceMoney = 0.0;
+    {% else %}
+    userExperienceMoney = {{ user.experience_money }}
+    {% endif %}
+
+    // let time_now = new Date();
+    // console.log(time_now)
+    // console.log(time_now.getTimezoneOffset())
 
     function calculateTotalPrice(){
         if(quantityInput.value > 0){
@@ -159,18 +187,26 @@
         if (quantityInput.checkValidity()) {
             if (quantityInput.value > 0) {
                 let time_now = new Date();
+                let timezone_offset = time_now.getTimezoneOffset()
                 time_now_string = `${time_now.getFullYear()}-${time_now.getMonth() + 1}-${time_now.getDate()}-${time_now.getHours()}-${time_now.getMinutes()}`;
                 let buyTicketUrl = new URL(e.target.href);
                 buyTicketUrl.searchParams.append('tickets_purchased', quantityInput.value);
                 buyTicketUrl.searchParams.append('purchase_time', time_now_string);
+                buyTicketUrl.searchParams.append('timezone_offset', timezone_offset);
+                if(userExperienceMoney >= (ticket_price * quantityInput.value)){
+                    buyTicketUrl.searchParams.append('purchased_using', "Experience Money");
+                }
+                else{                   
+                    buyTicketUrl.searchParams.append('purchased_using', "Wallet Balance");
+                }
                 let user_Confrim_purchase = window.confirm("Are you sure to proceed ?");
                 if(user_Confrim_purchase){
-                    if(userWalletBalance >= (ticket_price * quantityInput.value)){
+                    if(userWalletBalance >= (ticket_price * quantityInput.value) || userExperienceMoney >= (ticket_price * quantityInput.value)){
                         console.log("tickets purchased successfully")
                         window.location.href = buyTicketUrl.href;
                     }
                     else{
-                        window.alert("You don't have enough balance in your wallet. Please recharge your wallet to buy tickets")
+                        window.alert("You don't have enough credits. Please recharge your wallet to buy tickets")
                     }
                 }
             }

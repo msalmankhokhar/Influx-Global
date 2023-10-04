@@ -23,7 +23,8 @@
     <nav id="nav">
         <a href="/admin" id="logoLink" class="textCenter">Menu</a>
         <div id="navlinksContainer">
-            <div class="mydropdown">
+
+            <!-- <div class="mydropdown">
                 <button class="navlink navlinkWithIcon dropdownBtn">
                     <div class="btnContent">
                         <i class="fa-solid fa-film"></i>
@@ -72,47 +73,67 @@
                         <span>Pending Users</span>
                     </a>
                 </div>
-            </div>
+            </div> -->
+
+
+            <a href="/admin/all_movies" class="navlink navlinkWithIcon">
+                <i class="fa-solid fa-film"></i>
+                <span>Movies</span>
+            </a>
+            <a href="/admin/all_users" class="navlink navlinkWithIcon">
+                <i class="fa-solid fa-user"></i>
+                <span>Users</span>
+            </a>
             <a href="/admin/all_levels" class="navlink navlinkWithIcon">
                 <i class="fa-solid fa-ribbon"></i>
                 <span>Levels</span>
             </a>
+            <a href="/admin/withdraw_requests" class="navlink navlinkWithIcon">
+                <i class="fa-solid fa-dollar"></i>
+                <span>Withdraw</span>
+            </a>
+            <a id="logoutBtn" href="/admin/logout" class="btn btn-danger btnWithIcon">
+                <i class="fa-solid fa-power-off"></i>
+                <span>Log Out</span>
+            </a>
         </div>
     </nav>
 
-    <main id="main" class="container py-5">
+    <main id="main" class="container py-3">
         {% block main %}
-        <h1 class="my-3 text-center">All Movies</h1>
+        <h1 class="my-1 text-center">All Movies</h1>
         <a href="/admin/add_new_movie" class="btn btn-success my-3">Add New Movie</a>
-        <table id="moviesTable" class="table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Thumbnail</th>
-                <th scope="col">Movie Id</th>
-                <th scope="col">Title</th>
-                <th scope="col">category</th>
-                <th scope="col">Remaining Tickets</th>
-                <th scope="col">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-                {% for movie in moviesList %}
-                <tr>
-                    <td>{{ moviesList.index(movie) + 1 }}</td>
-                    <td><img class="movieThumbnail" src="{{movie['imgSrc']}}" alt=""></td>
-                    <td>{{movie['id']}}</td>
-                    <td>{{movie['title']}}</td>
-                    <td>{{movie['placement']}}</td>
-                    <td>{{movie['no_of_tickets']}}</td>
-                    <td>
-                        <a href="/admin/edit_movie/{{movie['id']}}" class="btn btn-info">Edit</a>
-                        <a href="/admin/delete_movie/{{movie['id']}}" class="btn btn-danger movieDelBtn">Delete</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-          </table>
+        <div class="tableWrapper">
+            <table id="moviesTable" class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Thumbnail</th>
+                        <th scope="col">Movie Id</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">category</th>
+                        <th scope="col">Remaining Tickets</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for movie in moviesList %}
+                    <tr>
+                        <td>{{ moviesList.index(movie) + 1 }}</td>
+                        <td><img class="movieThumbnail" src="{{movie['imgSrc']}}" alt=""></td>
+                        <td>{{movie['id']}}</td>
+                        <td>{{movie['title']}}</td>
+                        <td>{{movie['placement']}}</td>
+                        <td>{{movie['no_of_tickets']}}</td>
+                        <td>
+                            <a href="/admin/edit_movie/{{movie['id']}}" class="btn btn-info">Edit</a>
+                            <a href="/admin/delete_movie/{{movie['id']}}" class="btn btn-danger movieDelBtn">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
           {% endblock main %}
     </main>
 </body>
@@ -134,4 +155,17 @@
     });
 </script>
 {% endblock js %}
+<script>
+    let navlinkSpanList = document.querySelectorAll(".navlink.navlinkWithIcon span");
+        let currentNavlinkSpanText = "{{currentNavlinkSpanText}}";
+
+        document.body.onload = function () {
+            console.log("onload func runing")
+            navlinkSpanList.forEach(span => {
+                if (span.innerText == currentNavlinkSpanText) {
+                    span.parentElement.classList.add("selected");
+                }
+            });
+        }
+</script>
 </html>

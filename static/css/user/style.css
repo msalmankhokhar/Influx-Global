@@ -1,7 +1,10 @@
 
 body{
-    background: linear-gradient(45deg, black, transparent);
-    background-color: #02151e;
+    /* background: linear-gradient(45deg, black, transparent);
+    background-color: #02151e; */
+
+    background: linear-gradient(180deg, black, transparent);
+    background-color: #000b34;
     min-height: 100vh;
 }
 
@@ -12,13 +15,13 @@ nav{
     /* background-color: cadetblue; */
     /* background-color: #202020; */
     background-color: #001118;
-    background-color: #00192e;
+    background-color: black;
     position: fixed;
     width: 100vw;
     bottom: 0px;
     z-index: 1;
-    height: 13vh;
-    box-shadow: 1px 1px 10px black;
+    height: 4.5rem;
+    box-shadow: 1px 1px 10px #565656;
 }
 
 #navLogoLink{
@@ -28,10 +31,14 @@ nav{
     /* font-size: 1.6vw; */
     background-color: black;
     border-radius: 100%;
+    border: 2px solid #323232;
+    /* margin: 0px 15px; */
+    margin: 0px 4%;
 }
 
 #navLogo{
     width: 6vw;
+    width: 5.5rem;
 }
 
 /* #navLogo span{
@@ -47,7 +54,9 @@ nav{
 } */
 
 .navlink{
-    font-size: 1vw;
+    /* font-size: 1vw; */
+    /* font-size: 0.6rem; */
+    font-size: 1rem;
 }
 
 .navlinkContainer{
@@ -61,16 +70,22 @@ nav{
     align-items: center;
     row-gap: 4px;
     height: 100%;
-    width: 8vw;
+    /* width: 8vw; */
+    width: 100%;
     height: 100%;
 }
 
 .navlink.navlinkWithIcon i{
     font-size: 2vw;
+    font-size: 1rem;
 }
 
-.navlink.navlinkWithIcon:hover, .navlink.navlinkWithIcon.selected{
-    background-color: #003d68;
+.navlink.navlinkWithIcon.selected{
+    background-color: #b37c00;
+}
+
+.navlink.navlinkWithIcon:hover{
+    background-color: rgb(26 26 26);
 }
 
 .container{
@@ -115,11 +130,12 @@ nav{
 .movieCard{
     display: flex;
     flex-direction: column;
-    background-color: #090f25;
+    /* background-color: #090f25; */
+    background-color: #1d1e16d9;
     border-radius: 10px;
     padding: 15px;
     row-gap: 15px;
-    /* border: 2px solid rgb(102, 102, 102); */
+    border: 1px solid rgb(70 70 70);
     width: 36vw;
     box-shadow: 1px 1px 10px black;
 }
@@ -212,7 +228,7 @@ nav{
         width: auto;
     }
     nav{
-        height: 5.5rem;
+        height: 4rem;
         justify-content: normal;
     }
     .navlink{
@@ -225,10 +241,10 @@ nav{
         font-size: 1rem;
     }
     #navLogo {
-        width: 5.5rem;
+        width: 4.5rem;
     }
     #navLogoLink{
-        margin: 0px 15px;
+        /* margin: 0px 15px; */
     }
 }
 @media screen and (max-width: 1199px) {
@@ -259,7 +275,7 @@ nav{
         padding-right: 3vw;
     }
     #navLogoLink{
-        margin: 0px 5px;
+        /* margin: 0px 5px; */
     }
     .movieCard .buy{
         flex-direction: column;

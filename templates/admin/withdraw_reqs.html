@@ -1,0 +1,63 @@
+<!doctype html>
+{% extends 'admin/movies.html' %}
+
+{% block title %}Withdraw Requests{% endblock title %}
+
+{% block main %}
+
+<h1 class="my-3 text-center">Withdraw Requests</h1>
+        <!-- <a href="/admin/add_new_user" class="btn btn-success my-3">Add New Level</a> -->
+        <div class="tableWrapper">
+        <table id="moviesTable" class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Request ID</th>
+                <th scope="col">Status</th>
+                <th scope="col">User ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Country</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Payment Method</th>
+                <th scope="col">Time</th>
+                <th scope="col">Account Details</th>
+                <th scope="col">Actions</th>
+                
+                <!-- <th scope="col">Actions</th> -->
+              </tr>
+            </thead>
+            <tbody>
+                {% for req in paymentReqList %}
+                <tr>
+                    <td>{{ paymentReqList.index(req) + 1 }}</td>
+                    <td>{{ req.req_id }}</td>
+                    {% if req.status == "pending" %}
+                    <td><span class="paymentReqStatus pending">{{ req.status }}</span></td>
+                    {% else %}
+                    <td><span class="paymentReqStatus complete">{{ req.status }}</span></td>
+                    {% endif %}
+                    <td>{{ req.user_id }}</td>
+                    <td>{{ req.name }}</td>
+                    <td>{{ req.phone }}</td>
+                    <td>{{ req.country }}</td>
+                    <td>{{ req.amount }}</td>
+                    <td>{{ req.payment_method }}</td>
+                    <td>{{ req.admin_time }}</td>
+                    <td>{{ getAccountDetails(req.req_id) | safe }}</td>
+                    
+                    <td>
+                        {% if req.status == "pending" %}
+                        <a href="/admin/toggle_withdrawReq_status?req_id={{req.req_id}}" class="btn btn-success">Mark as Complete</a>
+                        {% else %}
+                        <a href="/admin/toggle_withdrawReq_status?req_id={{req.req_id}}" class="btn btn-danger">Mark as Pending</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table></div>
+
+{% endblock main %}
+
+{% block js %}{% endblock js %}

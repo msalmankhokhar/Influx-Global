@@ -98,7 +98,7 @@ payload = {
 
 # print(ngrok_path)
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from helper import raw_dateString_to_dateObj, get_readable_date_string, dateObj_to_raw_dateString, get_endTime_rawString
 # from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -155,4 +155,68 @@ import math
 
 balance = 25.006
 
-print(round(float(balance), 2))
+# print(round(float(balance), 2))
+
+import string
+from random import choices
+selfReferalCode = ''.join(choices(string.ascii_uppercase, k=4)) + '234568'
+# print(selfReferalCode)
+
+import pytz
+UCTTimeZone = pytz.utc
+fixedOffsetObj = pytz._FixedOffset(-240)
+# pytz.u
+dateObj = datetime.now()
+# dateObjWithTZ = timezone.localize(dateObj)
+
+# print(datetime.now())
+# print(datetime.now(tz=timezone(timedelta(minutes=-240))))
+# print(dateObjWithTZ)
+# print(dateObjWithTZ.tzinfo())
+
+# print(timezone)
+
+num = 240
+
+num = -num
+
+# print(num)
+
+# dateObje = raw_dateString_to_dateObj("2023-9-28-14-50")
+
+# print(dateObje)
+# year = dateObje.year
+# month = dateObje.month                    
+# day = dateObje.day               
+# hour = dateObje.hour                    
+# minute = dateObje.minute                    
+
+# dateObjeWithTimeZone = datetime(year=year, month=month, day=day, hour=hour, minute=minute, tzinfo=timezone(timedelta(minutes=-240)) )
+# dateObjeWithTimeZone = fixedOffsetObj.localize(dateObje)
+# dateObjeWithTimeZone = fixedOffsetObj.normalize(dateObje)
+
+# print(dateObjeWithTimeZone)
+# print(dateObjeWithTimeZone.now(dateObjeWithTimeZone.tzinfo))
+
+# trying how to get the timezone from country name
+from helper import abbrev_to_country, timezone_dict
+country_name = abbrev_to_country['TH']
+
+# print(pytz.country_timezones)
+# timezone_dict = dict(pytz.country_timezones)
+
+# timezone_str = timezone_dict['TH'][0]
+
+# thai_timezone = pytz.timezone(timezone_str)
+
+# datenow_in_thialand = datetime.now(pytz.timezone(timezone_str))
+
+# # print(str(datenow_in_thialand.tzinfo))
+
+# mydict = { "name":"salman", "class":6 }
+
+# for key in mydict:
+#     print(f"Key is {key} and value is {mydict[key]}")
+timezone = pytz.timezone(timezone_dict['TH'][0])
+print(datetime.now(tz=timezone))
+print(f"timezone is {timezone}")

@@ -1,1 +1,0 @@
-total_purchase_value

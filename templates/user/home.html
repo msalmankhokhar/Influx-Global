@@ -16,8 +16,20 @@
 {% block css %}{% endblock css %}
 
 <body>
-    {% block main %}
 
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert" id="alertBox">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+        
+    </div>
+  {% endif %}
+    {% endwith %}
+
+    {% block main %}
     <div class="categoryBtnsContainer">
         <a href="/user" class="btn btnTrans movieCategoryBtn">Daily</a>
         <a href="/user?movie_category=weekly" class="btn btnTrans movieCategoryBtn">Weekly</a>
@@ -53,11 +65,12 @@
 
         <div class="buy">
             <p>Estimated profit per ticket: <span>{{priceDict[movie['placement']]['profit']}}%</span></p>
-            {% if movie["id"] in purchasedMoviesList %}
+            <!-- {% if movie["id"] in purchasedMoviesList %}
             <button class="btn btnTrans">Already Purchased</button>
             {% else %}
             <a href="/user/quantity?movie_id={{movie['id']}}&ticket_price={{priceDict[movie['placement']]['price']}}&daily_profit_percent={{priceDict[movie['placement']]['profit']}}" class="btn btnNormal buyTicketBtn">Buy Ticket</a>
-            {% endif %}
+            {% endif %} -->
+            <a href="/user/quantity?movie_id={{movie['id']}}&ticket_price={{priceDict[movie['placement']]['price']}}&daily_profit_percent={{priceDict[movie['placement']]['profit']}}" class="btn btnNormal buyTicketBtn">Buy Ticket</a>
         </div>
 
         <hr>
@@ -79,10 +92,10 @@
             <i class="fa-solid fa-home"></i>
             <span>Home</span>
         </a>
-        <a href="/user/wallet" class="navlink navlinkWithIcon">
+        <!-- <a href="/user/wallet" class="navlink navlinkWithIcon">
             <i class="fa-solid fa-money-check-dollar"></i>
             <span>Wallet</span>
-        </a>
+        </a> -->
         <a href="/user/orders" class="navlink navlinkWithIcon">
             <i class="fa-solid fa-receipt"></i>
             <span>Orders</span>
@@ -98,10 +111,10 @@
             <i class="fa-solid fa-headset"></i>
             <span>Help</span>
         </a>
-        <a href="/logout/{{user.user_id}}" class="navlink navlinkWithIcon logoutBtn">
+        <!-- <a href="/logout/{{user.user_id}}" class="navlink navlinkWithIcon logoutBtn">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>Logout</span>
-        </a>
+        </a> -->
     </nav>
     {% endblock nav %}
 
@@ -130,7 +143,7 @@
 </script>
 {% block js %}
 <script>
-    let ticketBuyBtnList = document.querySelectorAll(".buyTicketBtn");
+    // let ticketBuyBtnList = document.querySelectorAll(".buyTicketBtn");
     
     // ticketBuyBtnList.forEach(btn => {
     //     btn.addEventListener('click', (e)=>{

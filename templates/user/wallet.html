@@ -14,7 +14,8 @@
     }
 
     .walletMain{
-        background: linear-gradient(90deg, #180848, #06101c, #180848);
+        /* background: linear-gradient(90deg, #180848, #06101c, #180848); */
+        background: linear-gradient(90deg, #483b08, #7d7e0a, #483b08);
         display: flex;
         flex-direction: column;
         border-radius: 15px;
@@ -23,7 +24,13 @@
         row-gap: 10px;
     }
 
-    #balanceContainer {
+    .walletMain p{
+        text-align: center;
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+
+    .balanceContainer {
         padding: inherit;
         display: flex;
         /* flex-direction: column; */
@@ -34,14 +41,14 @@
         column-gap: 15px;
     }
 
-    #balanceContainer .heading {
+    .balanceContainer .heading {
         font-size: 0.9rem;
 
     }
 
-    #balanceContainer .text {
+    .balanceContainer .text {
         font-weight: bold;
-        font-size: 1.2rem;
+        font-size: 2rem;
     }
 
     #walletContainer .actions {
@@ -76,6 +83,9 @@
             margin: 0px;
         }
     }
+    #alertBox{
+        background-color: #15059b;
+    }
 </style>
 {% endblock css %}
 
@@ -84,7 +94,14 @@
 <div class="container" id="walletContainer">
 
     <div class="walletMain">
-        <div id="balanceContainer">
+        {% if user.experience_money != None %}
+        <div class="balanceContainer">
+            <span class="heading">Experience Money</span>
+            <span class="text">&dollar; {{ round(user.experience_money, 3) }}</span>
+        </div>
+        <p>The Experience Money is valid till 24 hours after acccont creation. You can it to buy tickets and for practice (demo purposes)</p>
+        {% endif %}
+        <div class="balanceContainer">
             <span class="heading">Your Balance</span>
             <span class="text">&dollar; {{ round(user.wallet_balance, 3) }}</span>
         </div>
@@ -101,7 +118,7 @@
         <a href="/user/recharge" class="btn btnWithIcon">
             <i class="fa-solid fa-coins"></i>
             <span>Recharge</span>
-            <a href="" class="btn btnWithIcon">
+            <a href="/user/withdraw" class="btn btnWithIcon">
                 <i class="fa-solid fa-money-bill-transfer"></i>
                 <span>Withdraw</span>
             </a>

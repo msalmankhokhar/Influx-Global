@@ -1,26 +1,33 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from helper import country_to_abbrev, abbrev_to_country, get_movie_details, get_movie_img_src, get_readable_date_string, get_endTime_rawString, raw_dateString_to_dateObj
-from random import randint
+from helper import country_to_abbrev, abbrev_to_country, get_movie_details, get_movie_img_src, get_readable_date_string, get_endTime_rawString, raw_dateString_to_dateObj, dateObj_to_raw_dateString, timezone_dict
+from random import randint, choices
 from phonenumbers import parse, is_valid_number, is_possible_number, NumberParseException, country_code_for_region
 import requests
 from twilio.rest import Client
 from unipayment import UniPaymentClient, CreateInvoiceRequest, ApiException
 import json
+import string
 from flask_ngrok import run_with_ngrok
 from datetime import datetime, timedelta
+import pytz
 from flask_apscheduler import APScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+from multiprocessing import Process
 
 app = Flask(__name__)
 # run_with_ngrok(app)
 app.secret_key = 'salman khokhar'
-app_restarted = True
+app_restarted = False
 
-app_settings = json.load(open("settings.json", "r"))
-# app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
+try:
+    app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
+except:
+    app_settings = json.load(open("settings.json", "r"))
 
 # setting up database configration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
@@ -34,15 +41,14 @@ class apSchedulerConfig:
     SCHEDULER_JOBSTORES = {"default": SQLAlchemyJobStore(url="sqlite:///jobstore.sqlite")}
     # SCHEDULER_JOBSTORES = {"default": MemoryJobStore()}
 
-    SCHEDULER_EXECUTORS = {"default": {"type": "threadpool", "max_workers": 10000}}
+    SCHEDULER_EXECUTORS = {"default": {"type": "threadpool", "max_workers": 1000}}
+    # SCHEDULER_EXECUTORS = {"default": {"type": "processpool", "max_workers": 61}}
     # SCHEDULER_JOB_DEFAULTS = {"coalesce": False, "max_instances": 3}
-    # SCHEDULER_API_ENABLED = True
+    SCHEDULER_API_ENABLED = True
 # scheduler = APScheduler(app=app)
 
 app.config.from_object(apSchedulerConfig())
 scheduler_main = APScheduler(scheduler=BackgroundScheduler(), app=app)
-
-
 
 class users(db.Model):
     user_id = db.Column(db.String(50), primary_key=True, nullable=False)
@@ -55,15 +61,30 @@ class users(db.Model):
     level = db.Column(db.Integer, nullable=False, unique=False)
 
     purchased_tickets = db.Column(db.String, nullable=True, unique=False)
+    payment_requests = db.Column(db.String, nullable=True, unique=False)
 
     overall_referals = db.Column(db.Integer, nullable=False, unique=False)
     overall_deposit = db.Column(db.Float, nullable=False, unique=False)
 
     wallet_balance = db.Column(db.Float, nullable=False, unique=False)
+    experience_money = db.Column(db.Float, nullable=True, unique=False)
     overall_earning = db.Column(db.Float, nullable=False, unique=False)
     today_earning = db.Column(db.Float, nullable=False, unique=False)
     monthly_earning = db.Column(db.Float, nullable=False, unique=False)
-        
+
+class paymentResquests(db.Model):
+    req_id = db.Column(db.String(50), primary_key=True)
+    user_id = db.Column(db.String(50), nullable=True, unique=False)
+    name = db.Column(db.String, nullable=True, unique=False)
+    phone = db.Column(db.String(50), nullable=True, unique=False)
+    country = db.Column(db.String, nullable=True, unique=False)
+    user_time = db.Column(db.String, nullable=True, unique=False)
+    admin_time = db.Column(db.String, nullable=True, unique=False)
+    status = db.Column(db.String(20), nullable=True, unique=False)
+    amount = db.Column(db.Float, nullable=True, unique=False)
+    account_details = db.Column(db.String, nullable=True, unique=False)
+    payment_method = db.Column(db.String, nullable=True, unique=False)
+
 class levels(db.Model):
     level_number = db.Column(db.Integer, primary_key=True, nullable=False)
 
@@ -225,7 +246,7 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
             print("went in if")
             total_purchase_value = data['total_purchase_value']
             selected_user.wallet_balance += total_purchase_value
-            data["status"] = "completed"
+            data["status"] = "Completed"
             purchased_tickets = json.loads(selected_user.purchased_tickets)
             purchased_tickets[data_index] = data
             selected_user.purchased_tickets = json.dumps(purchased_tickets)
@@ -249,7 +270,7 @@ def return_daily_profit(user_id, data):
             selected_user.wallet_balance += estimated_daily_profit
             selected_user.today_earning += estimated_daily_profit
             selected_user.monthly_earning += estimated_daily_profit
-            users.overall_earning += estimated_daily_profit
+            selected_user.overall_earning += estimated_daily_profit
             db.session.commit()
             print(f'Returned {estimated_daily_profit} dollars in wallet of {selected_user.name} as daily profit')
         else:
@@ -259,13 +280,16 @@ def return_daily_profit(user_id, data):
 def buy_ticket():
     if request.method == "GET" and "user" in session:
         movie_id = request.args.get("movie_id")
+        purchased_using = request.args.get("purchased_using")
         purchase_time = request.args.get("purchase_time")
         ticket_price = int(request.args.get("ticket_price"))
         tickets_purchased = int(request.args.get("tickets_purchased"))
+        timezone_offset = int(request.args.get("timezone_offset"))
 
 
         selected_movie = movies.query.filter_by(imdb_movie_id=movie_id).first()
         selected_user = users.query.filter_by(user_id=session['user']).first()
+        user_country_timezone = pytz.timezone(timezone_dict[selected_user.country][0])
         selected_level = levels.query.filter_by(level_number=selected_user.level).first()
 
         movieRelease_Date = get_movie_details_from_ID(selected_movie.imdb_movie_id)["releaseDate"]
@@ -275,7 +299,9 @@ def buy_ticket():
         else:
             end_time = get_endTime_rawString(purchaeTime_rawString=purchase_time, movie_release_date=movieRelease_Date, category=selected_movie.placement, presale=False)
 
-        end_time_obj = raw_dateString_to_dateObj(end_time)
+        # userTimeZone = pytz.timezone()
+        end_time_obj = raw_dateString_to_dateObj(rawDateString=end_time)
+        purchase_time_obj = raw_dateString_to_dateObj(rawDateString=purchase_time)
 
         profitDict = {
             "24 hour" : selected_level.daily_ticket_profit,
@@ -294,6 +320,7 @@ def buy_ticket():
             "total_purchase_value" : total_purchase_value,
             # "estimated_total_profit" : tickets_purchased * ticket_price,
             "estimated_daily_profit" : estimated_daily_profit,
+            "purchased_using" : purchased_using,
             "status" : "in progress"
         }
         selected_user = users.query.filter_by(user_id = session["user"]).first()
@@ -303,20 +330,28 @@ def buy_ticket():
             data_index = purchased_tickets_list.index(data)
             updated_tickets_list = json.dumps(purchased_tickets_list)
             selected_user.purchased_tickets = updated_tickets_list
-            selected_user.wallet_balance -= total_purchase_value
+
+            if purchased_using == "Experience Money":
+                selected_user.experience_money -= total_purchase_value
+            else:
+                selected_user.wallet_balance -= total_purchase_value
+                
             selected_movie.no_of_tickets -= 1
-            func_id_return_capital = f"capital_{selected_user.user_id}_{movie_id}"
-            func_id_return_dailyProfit = f"daily_profit_{selected_user.user_id}_{movie_id}"
+            func_id_return_capital = f"capital_{selected_user.user_id}_{movie_id}_{purchase_time}"
+            func_id_return_dailyProfit = f"daily_profit_{selected_user.user_id}_{movie_id}_{purchase_time}"
             print("starting to set sceduler function")
             # scheduler.add_job(func=return_capital_amount, trigger='date', id=func_id, run_date=end_time_obj, args=[selected_user.user_id, data])
 
             # global scheduler_main
-            
-            scheduler_main.add_job(func=return_capital_amount, trigger='date', run_date=end_time_obj, args=[selected_user.user_id, data, func_id_return_dailyProfit, data_index], id=func_id_return_capital)
-            date_today = datetime.today().date()
-            end_time_obj_for_dailyProfitFunc = end_time_obj + timedelta(days=1)
-            scheduler_main.add_job(func=return_daily_profit, trigger='cron', start_date=date_today, end_date=end_time_obj_for_dailyProfitFunc.date(), hour=8, minute=10, args=[selected_user.user_id, data], id=func_id_return_dailyProfit)
-            
+            if purchased_using == "Wallet Balance":
+                scheduler_main.add_job(func=return_capital_amount, trigger='date', run_date=end_time_obj, args=[selected_user.user_id, data, func_id_return_dailyProfit, data_index], id=func_id_return_capital, timezone=user_country_timezone)
+            # date_today = datetime.now(tz=pytz.timezone(timezone_dict[selected_user.country][0]))
+            # end_time_obj_for_dailyProfitFunc = end_time_obj + timedelta(hours=24)
+            # end_time_obj_for_dailyProfitFunc = end_time_obj + timedelta(hours=24)
+            # run_time_obj_for_dailyProfitFunc = end_time_obj - timedelta(minutes=3)
+            end_time_obj_for_dailyProfitFunc = end_time_obj - timedelta(minutes=3)
+            scheduler_main.add_job(func=return_daily_profit, trigger='cron', start_date=purchase_time_obj, end_date=end_time_obj_for_dailyProfitFunc, hour=end_time_obj_for_dailyProfitFunc.hour, minute=end_time_obj_for_dailyProfitFunc.minute,second=end_time_obj_for_dailyProfitFunc.second, args=[selected_user.user_id, data], id=func_id_return_dailyProfit, timezone=user_country_timezone)
+            print(f"added jobs for returning daily profit and capital amount for user timezone {user_country_timezone}")
             # scheduler_main.remove_all_jobs()
             print("sceduler function successfully")
             # @scheduler.task(trigger='date', id=f"{selected_user.user_id}_{movie_id}", run_date=end_time_obj, args=[selected_user.user_id, data])
@@ -335,7 +370,8 @@ def movie_quantity():
             ticket_price = request.args.get("ticket_price")
             daily_profit_percent = request.args.get("daily_profit_percent")
             movie = get_movie_details_from_ID(movie_id=movie_id)
-            return render_template("user/quantity.html", ticket_price=ticket_price, movie=movie, user=user, daily_profit_percent=daily_profit_percent)
+            userLevel = levels.query.get(user.level)
+            return render_template("user/quantity.html", ticket_price=ticket_price, movie=movie, user=user, daily_profit_percent=daily_profit_percent, userLevel=userLevel)
             # return movie
         else:
             return redirect("/")
@@ -388,6 +424,7 @@ def user_orders():
                 # moviesListFiltered = [ e for e in json.loads(selected_user.purchased_tickets) if movies.query.filter_by(imdb_movie_id=e["movie_id"]).first() != None ]
                 moviesListFilteredDict = filteredOrderedMoviesList(moviesList)
                 moviesListFiltered = moviesListFilteredDict["list"]
+                moviesListFiltered.reverse()
                 if moviesListFilteredDict["should_update_database"]:
                     selected_user.purchased_tickets = json.dumps(moviesListFiltered)
                     db.session.commit()
@@ -397,7 +434,7 @@ def user_orders():
     "weekly": {"price":5, "profit":user_level.weekly_ticket_profit, "duration": "1 week (7 days)", "duration_days":7},
     "pre sale": {"price":5, "profit":user_level.presale_ticket_profit, "duration": "1 month", "duration_days":30}
     }
-                return render_template("user/orders.html", user=selected_user, moviesList=moviesListFiltered, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders")
+                return render_template("user/orders.html", user=selected_user, moviesList=moviesListFiltered, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders", round=round)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -418,22 +455,153 @@ def user_wallet():
         else:
             return redirect("/")
 
-def upgradeUserLevel(user:users):
+def upgradeUserLevel(user_id):
     with app.app_context():
+        user = users.query.filter_by(user_id=user_id).first()
         currentLevel_number = user.level
-        next_level = levels.query.filter_by(level_number = currentLevel_number+1).first()
-        if user.overall_deposit >= next_level.minimum_overall_deposit and user.overall_referals >= next_level.minimum_overall_invitation:
-            user.level += 1
-            db.session.commit()
-            return True
-        else:
+        next_levels_list = levels.query.filter(levels.level_number > currentLevel_number).all()
+        level_valid = None
+        for level in next_levels_list:
+            # if user.overall_deposit >= level.minimum_overall_deposit or user.overall_referals >= level.minimum_overall_deposit:                
+            #     level_valid = level.level_number
+
+            if user.overall_deposit >= level.minimum_overall_deposit:
+                level_valid = level.level_number
+            elif user.overall_referals >= level.minimum_overall_deposit and level.minimum_overall_deposit > 0:
+                refered_users_list = users.query.filter_by(joiningReferalCode = user.selfReferalCode).all()
+                valid_refered_users = 0
+                if len(refered_users_list) > 0:
+                    for refered_user in refered_users_list:
+                        if refered_user.overall_deposit > 0:
+                            valid_refered_users += 1
+                if valid_refered_users >= level.minimum_overall_deposit:
+                    level_valid = level.level_number
+
+        if level_valid == None:
+            print("response is false")
             return False
+        else:
+            user.level = level_valid
+            db.session.commit()
+            print(f"response is true and user level upgraded successfully to {level_valid}. old level is {currentLevel_number}")
+            return True
+
+def float_to_int(num:float):
+    return int(num)
+
+@app.route("/user/withdraw", methods=["GET", "POST"])
+def user_withdraw():
+    user_id = session["user"]
+    selected_user = users.query.filter_by(user_id = user_id).first()
+    if request.method == "GET":
+        if "user" in session:
+            if selected_user:
+                return render_template("user/withdraw.html", user = selected_user, float_to_int=float_to_int)
+            else:
+                session.pop("user")
+                return redirect("/")
+        else:
+            return redirect("/")
+    elif request.method == "POST":
+        amount =  float(request.form.get('amount'))
+        payment_method = request.form.get("payment_method")
+        # return f"Amount is {amount} and payment method is {payment_method}"
+        return redirect(f"/user/get_account_details?amount={amount}&payment_method={payment_method}")
+
+@app.route("/user/get_account_details", methods=["GET", "POST"])
+def user_get_account_details():
+    try:
+        user_id = session["user"]
+    except:
+        user_id = 'None'
+    selected_user = users.query.filter_by(user_id = user_id).first()
+    if request.method == "GET":
+        if "user" in session and selected_user:
+            amount = float(request.args.get("amount"))
+            payment_method = request.args.get("payment_method")
+            if payment_method == "TRC20":
+                return render_template("user/getCryptoDetails.html", selected_amount=amount, payment_method=payment_method)
+                # return f"Amount is {amount} and payment method is {payment_method}"
+            elif payment_method == "Bank Transfer":
+                # return f"Amount is {amount} and payment method is {payment_method}"
+                return render_template("user/getBankDetails.html", user=selected_user, abbrev_to_country=abbrev_to_country, selected_amount=amount, payment_method=payment_method)
+            else:
+                return "payment method not selected"
+        else:
+            return redirect("/login")
+    elif request.method == "POST":
+        amount = float(request.form.get("amount"))
+        payment_method = request.form.get("payment_method")
+
+        # timezone_dict = dict(pytz.country_timezones)
+        # timezone_str = timezone_dict['TH'][0]
+        # thai_timezone = pytz.timezone(timezone_str)
+        datenow_in_thialand = datetime.now(pytz.timezone(timezone_dict['TH'][0]))
+        datenow_for_user = datetime.now(pytz.timezone(timezone_dict[selected_user.country][0]))
+        date_str_for_user = dateObj_to_raw_dateString(datenow_for_user)
+        date_str_for_admin = dateObj_to_raw_dateString(datenow_in_thialand)
+        paymentRequestDict = {
+                "user_id" : selected_user.user_id,
+                "name" : selected_user.name,
+                "phone" : selected_user.phone,
+                "country" : abbrev_to_country[selected_user.country],
+                "amount" : amount,
+                "payment_method" : payment_method,
+                "time" : { "user":get_readable_date_string(date_str_for_user), "admin":get_readable_date_string(date_str_for_admin) },
+                "status" : "Pending",
+                "account_details" : None
+            }
+
+        new_paymentRequest = paymentResquests(
+            req_id = f"{dateObj_to_raw_dateString(datenow_in_thialand)}_{selected_user.user_id}",
+            user_id = selected_user.user_id,
+            name = selected_user.name,
+            phone = selected_user.phone,
+            country = abbrev_to_country[selected_user.country],
+            user_time = get_readable_date_string(date_str_for_user),
+            admin_time = get_readable_date_string(date_str_for_admin),
+            status = "pending",
+            amount = amount,
+            payment_method = payment_method
+        )
+        if payment_method == "TRC20":
+            trc20_address = request.form.get("trc20_address")
+            account_details = {
+                "trc20_address" : trc20_address
+            }
+            paymentRequestDict["account_details"] = account_details
+            new_paymentRequest.account_details = json.dumps(account_details)
+        elif payment_method == "Bank Transfer":
+            bank_name = request.form.get("bank_name")
+            account_holder = request.form.get("account_holder")
+            account_number = request.form.get("account_number")
+            iban = request.form.get("iban")
+            account_details = {
+                "bank_name" : bank_name,
+                "account_holder" : account_holder,
+                "account_number" : account_number,
+                "iban" : iban
+            }
+            paymentRequestDict["account_details"] = account_details
+            new_paymentRequest.account_details = json.dumps(account_details)
+        else:
+            return "payment method not selected"
+        # user_payment_requests = json.loads(selected_user.payment_requests)
+        # user_payment_requests.append(paymentRequestDict)
+        db.session.add(new_paymentRequest)
+        selected_user.wallet_balance -= amount
+        try:
+            db.session.commit()
+        except Exception as error:
+            return error
+        # return paymentRequestDict
+        flash(message="The admins have recieved your withdraw request. You will recieve the payment in 1-3 Days. In case of further delay, you can contact the constomer support")
+        return redirect("/user/wallet")
 
 # setting up UniPayment API
 unipayment_client_id = 'bb6d66bc-b466-48a2-ae5c-f4002c9c3bc1'
 unipayment_client_secret = 'F6EGZnmJTyY7Z1VQuJpwr864FV6D3eeRo'
 unipayment_app_id = 'b52153b8-0c10-4350-b246-d27c6d5b1d85'
-
 unipaymet_client = UniPaymentClient(unipayment_client_id, unipayment_client_secret)
 
 @app.route("/user/recharge", methods=["GET", "POST"])
@@ -462,6 +630,8 @@ def user_recharge():
             price_currency='USD',
             redirect_url='https://www.influx-global.com/user/wallet',
             notify_url='https://www.influx-global.com/user/wallet/verify_recharge',
+            # redirect_url='http://127.0.0.1:5000/user/wallet',
+            # notify_url='http://127.0.0.1:5000/user/wallet/verify_recharge',
             pay_currency='USDT',
             network='NETWORK_TRX',
             ext_args=None,
@@ -501,7 +671,10 @@ def verify_wallet_recharge():
                     selected_user.wallet_balance += confirmed_amount
                     selected_user.overall_deposit += confirmed_amount
                     db.session.commit()
-                    upgradeUserLevel(selected_user)
+                    
+                    if upgradeUserLevel(selected_user.user_id):
+                        db.session.commit()
+                        
                     print("successfully updated the user wallet balance")
                     # session.pop("pending_invoice")
                     print(f"{confirmed_amount} amount is confirmed")
@@ -555,6 +728,16 @@ def logout(userid):
             if session["user"] == selected_user.user_id:
                 session.pop("user")
         return redirect("/")
+    
+@app.route("/admin/logout", methods=["GET"])
+def admin_logout():
+    if request.method == "GET":
+        if "adminuser" in session:
+            session.pop("user")
+            return redirect("/admin/login")
+        else:
+            return redirect("/admin/login")
+
 
 # Setting up twilio SMS API
 
@@ -592,22 +775,35 @@ def verifyUserPhoneNumber(phoneNumber):
                         selfReferalCode = session["pending_user"]["selfReferalCode"],
                         joiningReferalCode = session["pending_user"]["joiningReferalCode"],
                         overall_referals = 0,
-                        overall_deposit = 0,
-                        wallet_balance = 100,
-                        overall_earning = 0,
+                        overall_deposit = 0.0,
+                        wallet_balance = 0.0,                        
+                        experience_money = 100.0,
+                        overall_earning = 0.0,
                         level = 0,
                         purchased_tickets = '[]',
-                        today_earning = 0,
-                        monthly_earning = 0
+                        payment_requests = '[]',
+                        today_earning = 0.0,
+                        monthly_earning = 0.0
                     )
 
             db.session.add(pending_user)
             invitor_user = users.query.filter_by(selfReferalCode=session["pending_user"]["joiningReferalCode"]).first()
             invitor_user.overall_referals += 1
             db.session.commit()
+
+            # timezone_dict = dict(pytz.country_timezones)
+            # timezone_str = timezone_dict[pending_user.country][0]
+            # end_time_obj = datetime.now(pytz.timezone(timezone_str)) + timedelta(hours=24)
+            
+            end_time_obj = datetime.now() + timedelta(hours=24)
+
+            func_id_Destroy_exp_money = f"Destroy_exp_money_{pending_user.user_id}"
+            scheduler_main.add_job(func=destroy_experience_money, trigger='date', run_date=end_time_obj, args=[pending_user.user_id], id=func_id_Destroy_exp_money)
             session.pop("pending_user")
-            upgradeUserLevel(invitor_user)
+            if upgradeUserLevel(invitor_user.user_id):
+                db.session.commit()
             # return "Your phone number has been verified and account has been created in the database"
+            session.pop("pending_user")
             return redirect("/login")
         else:
             session.pop("pending_user")
@@ -621,9 +817,10 @@ def generate_user_id():
     else:
         generate_user_id()
 
-def generate_selfReferalCode(name):
-    name = name.strip().replace(" ", "_")
-    selfReferalCode = name.upper() + "_" + str(randint(111111, 999999))
+def generate_selfReferalCode(userid):
+    # name = name.strip().replace(" ", "_")
+    # selfReferalCode = name.upper() + "_" + str(randint(111111, 999999))
+    selfReferalCode = ''.join(choices(string.ascii_uppercase, k=4)) + userid
     selected_user = users.query.filter_by(selfReferalCode=selfReferalCode).first()
     if selected_user == None:
         return selfReferalCode
@@ -632,6 +829,11 @@ def generate_selfReferalCode(name):
 
 def generate_referalLink(referalCode, websiteName='influxglobal.com'):
     return f'http://{websiteName}/register?referalCode={referalCode}'
+
+def destroy_experience_money(user_id):
+    selected_user = users.query.get(user_id)
+    selected_user.experience_money = None
+    db.session.commit()
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -662,7 +864,7 @@ def register():
                 response = requests.get("https://phonevalidation.abstractapi.com/v1/?api_key=fe66a964c6b24f49aa0502d30d550d0d&phone=923186456552")
                 if response.json()["valid"]:
                     user_id = generate_user_id()
-                    selfReferalCode = generate_selfReferalCode(name=name)
+                    selfReferalCode = generate_selfReferalCode(userid=user_id)
                     session["pending_user"] = {
                         "user_id" : user_id,
                         "name" : name,
@@ -711,17 +913,10 @@ def admin_login():
         else:
             return "<h1>Wrong password try Again</h1>"
 
-@app.route("/admin/logout", methods=["GET"])
-def admin_logout():
-    if request.method == "GET":
-        if "adminuser" in session:
-            session.pop("adminuser")
-            return redirect("/admin")
-
 @app.route("/admin/add_new_user", methods=["GET", "POST"])
 def add_user_mannaul():
     if request.method == "GET":
-        if "adminuser" not in session:
+        if "adminuser" in session:
             return render_template("add_new_user.html", wallet_balance_field=True)
         else:
             return redirect("/admin/login")
@@ -745,7 +940,7 @@ def add_user_mannaul():
                 response = requests.get("https://phonevalidation.abstractapi.com/v1/?api_key=fe66a964c6b24f49aa0502d30d550d0d&phone=923186456552")
                 if response.json()["valid"]:
                     user_id = generate_user_id()
-                    selfReferalCode = generate_selfReferalCode(name=name)
+                    selfReferalCode = generate_selfReferalCode(userid=user_id)
                     new_user = users(
                         user_id = user_id,
                         name = name,
@@ -755,18 +950,23 @@ def add_user_mannaul():
                         selfReferalCode = selfReferalCode,
                         joiningReferalCode = joiningReferalCode,
                         overall_referals = 0,
-                        overall_deposit = 0,
+                        overall_deposit = 0.0,
                         wallet_balance = wallet_balance,
-                        overall_earning = 0,
+                        experience_money = 100.0,
+                        overall_earning = 0.0,
                         level = 0,
                         purchased_tickets = '[]',
-                        today_earning = 0,
-                        monthly_earning = 0
+                        payment_requests = '[]',
+                        today_earning = 0.0,
+                        monthly_earning = 0.0
                     )
                     if invitor_user:
                         db.session.add(new_user)
                         invitor_user.overall_referals += 1
                         db.session.commit()
+                        end_time_obj = datetime.today() + timedelta(hours=24)
+                        func_id_Destroy_exp_money = f"Destroy_exp_money_{new_user.user_id}"
+                        scheduler_main.add_job(func=destroy_experience_money, trigger='date', run_date=end_time_obj, args=[new_user.user_id], id=func_id_Destroy_exp_money)
                         return redirect('/admin/all_users')
                     else:
                         return "Referal code is not valid. Please enter a valid referal/invitation code"
@@ -782,7 +982,7 @@ def admin_all_movies():
     if request.method == "GET":
         if "adminuser" in session:
             moviesList = get_movies_list()
-            return render_template('admin/movies.html', moviesList=moviesList)
+            return render_template('admin/movies.html', moviesList=moviesList, currentNavlinkSpanText="Movies")
         else:
             return redirect("/admin/login")
     
@@ -791,7 +991,7 @@ def admin_all_users():
     if request.method == "GET":
         if "adminuser" in session:
             usersList = users.query.all()
-            return render_template('admin/users.html', usersList=usersList)
+            return render_template('admin/users.html', usersList=usersList, round=round, currentNavlinkSpanText="Users", abbrev_to_country=abbrev_to_country)
         else:
             return redirect("/admin/login")
     
@@ -800,7 +1000,44 @@ def admin_all_levels():
     if request.method == "GET":
         if "adminuser" in session:
             levelList = levels.query.all()
-            return render_template('admin/levels.html', levelList=levelList)
+            return render_template('admin/levels.html', levelList=levelList, currentNavlinkSpanText="Levels")
+        else:
+            return redirect("/admin/login")
+
+def getAccountDetails(req_id):
+    with app.app_context():
+        selected_paymentRequest = paymentResquests.query.filter_by(req_id=req_id).first()
+        accountDetailsDict =  json.loads(selected_paymentRequest.account_details)
+        accountDetailsString = ""
+        for key in accountDetailsDict:
+            accountDetailsString += f"<p>{key} : {accountDetailsDict[key]}</p><br>"
+        return accountDetailsString
+
+@app.route("/admin/withdraw_requests", methods=["GET"])
+def admin_withDraw_requests():
+    if request.method == "GET":
+        if "adminuser" in session:
+            paymentReqList = paymentResquests.query.all()
+            paymentReqList.reverse()
+            return render_template('admin/withdraw_reqs.html', paymentReqList=paymentReqList, currentNavlinkSpanText="Withdraw", getAccountDetails=getAccountDetails)
+        else:
+            return redirect("/admin/login")
+        
+@app.route("/admin/toggle_withdrawReq_status", methods=["GET"])
+def admin_toggle_withDrawReqStatus():
+    if request.method == "GET":
+        if "adminuser" in session:
+            req_id = request.args.get("req_id")
+            selected_paymentReq = paymentResquests.query.filter_by(req_id=req_id).first()
+            if selected_paymentReq.status == "pending":
+                selected_paymentReq.status = "complete"
+            elif selected_paymentReq.status == "complete":
+                selected_paymentReq.status = "pending"
+            try:
+                db.session.commit()
+            except Exception as error:
+                return redirect("/admin/withdraw_requests")
+            return redirect("/admin/withdraw_requests")
         else:
             return redirect("/admin/login")
 
@@ -875,22 +1112,50 @@ def add_wallet_balance(userId):
     selected_user = users.query.filter_by(user_id=userId).first()
     if request.method == "GET":
         if "adminuser" in session:
-            return render_template("admin/add_wallet_balance.html", user=selected_user)
+            return render_template("admin/add_wallet_balance.html", user=selected_user, round=round)
         else:
             return redirect("/admin/login")
     elif request.method == "POST":
-        added_wallet_balance = int(request.form.get("added_wallet_balance"))
+        added_wallet_balance = float(request.form.get("added_wallet_balance"))
+        send_as = request.form.get("send_as")
         selected_user.wallet_balance += added_wallet_balance
+        if send_as == "recharge":
+            print("Admin sent as recharge")
+            selected_user.overall_deposit += added_wallet_balance
+        db.session.commit()
+        print(f"user level before is {selected_user.level}")
+        if upgradeUserLevel(selected_user.user_id):
+            print("went in if to update the database for level upgrade")
+            db.session.commit()
+            print("successfully updated DB for level upgrade")
+        print(f"user level after running upgrade func is {selected_user.level}")
+        return redirect("/admin/all_users")
+    
+@app.route("/admin/minus_wallet_balance/<string:userId>", methods=["GET", "POST"])
+def minus_wallet_balance(userId):
+    selected_user = users.query.filter_by(user_id=userId).first()
+    if request.method == "GET":
+        if "adminuser" in session:
+            return render_template("admin/minus_wallet_balance.html", user=selected_user, round=round)
+        else:
+            return redirect("/admin/login")
+    elif request.method == "POST":
+        minused_wallet_balance = float(request.form.get("minused_wallet_balance"))
+        selected_user.wallet_balance -= minused_wallet_balance
         db.session.commit()
         return redirect("/admin/all_users")
 
+# def start_scheduler():
+#     print("starting scheduler")
+#     scheduler_main.start()
+#     print("started scheduler successfully")
 
-# @app.route("/api/user_wallet_query", methods=["GET"])
-# def api_user_wallet_query():
-#     user_id = request.args.get("user_id")
 
 if __name__ == "__main__":
-    # scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job")
-    # scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job")
+    # scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc )
+    # scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc )
     scheduler_main.start()
+    # start_scheduler = scheduler_main.start
+    # schedular_start_process = Process(target=scheduler_main.start(), name="schedular_starter_process")
+    # schedular_start_process.start()
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -125,6 +125,12 @@ button.navlink.navlinkWithIcon{
     background: #02008b;
 }
 
+#logoutBtn{
+    align-self: center;
+    margin: 30px 0px;
+    font-size: 0.85rem;
+}
+
 /* button.navlink.navlinkWithIcon:active{
     background-color: black;
 } */
@@ -135,7 +141,7 @@ button.navlink.navlinkWithIcon{
     /* justify-content: space-between; */
     padding: 13px 10%;
     background: none;
-    border-bottom: 1px solid white;
+    /* border-bottom: 1px solid white; */
 }
 
 a.navlink.navlinkWithIcon{
@@ -151,17 +157,51 @@ button.navlink.navlinkWithIcon .btnContent{
     column-gap: 10px;
 }
 
-.navlink.navlinkWithIcon.selected, a.navlink.navlinkWithIcon:hover{
-    background-color: #ff7600;
+.navlink.navlinkWithIcon.selected, a.navlink.navlinkWithIcon.selected:hover{
+    background-color: #903cff;
+}
+
+a.navlink.navlinkWithIcon:hover{
+    background-color: #4a4a4a;
+}
+
+div.tableWrapper{
+    overflow: auto;
+    height: 62vh;
+}
+
+#moviesTable{
+    position: relative;
+}
+
+#moviesTable thead{
+    position: sticky;
+    top: 0px;
+    background: #000058;
+    height: 65px;
 }
 
 #moviesTable th, td{
     text-align: center;
     vertical-align: middle;
+    font-size: 0.9rem;
+    min-width: 105px;
 }
 
 .movieThumbnail{
     /* width: 100px; */
     width: 5vw;
     border: 2px solid white;
+}
+
+span.paymentReqStatus{
+    color: black;
+    padding: 9px;
+    border-radius: 5px;
+}
+span.paymentReqStatus.pending{
+    background-color: #f9a6a6;
+}
+span.paymentReqStatus.complete{
+    background-color: #5af36d;
 }

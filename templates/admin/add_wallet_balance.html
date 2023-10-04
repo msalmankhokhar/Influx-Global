@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
-{% block title %}Log In{% endblock title %}
+{% block title %}Add Balance{% endblock title %}
 
-{% block desc %}Log In to your Influx Global Account{% endblock desc %}
+{% block desc %}Add balance in user's wallet{% endblock desc %}
 
 {% block css %}
 
@@ -46,13 +46,17 @@ form{
     padding: 15px;
     display: flex;
     flex-direction: column;
-    row-gap: 10px;
+    row-gap: 30px;
     width: 90%;
     border-radius: 8px;
 }
 
 form p{
     align-self: center;
+}
+
+form label{
+    color: black;
 }
 
 form p span{
@@ -62,6 +66,10 @@ form p span{
 form p a{
     color: blue;
     text-decoration: none;
+}
+
+.radioContainer{
+    align-self: center;
 }
 
 .inputFieldWrapper{
@@ -110,11 +118,19 @@ select.inputField option{
     <!-- <a style="text-decoration: none;" href="/">InfluxGlobal.com</a> -->
     <!-- </h1> -->
     <h1 class="textCenter">Add balance in User's wallet</h1>
-    <p>Current wallet balance is <strong>&dollar; {{user.wallet_balance}}</strong></p>
+    <p>Current wallet balance is <strong>&dollar; {{round(user.wallet_balance, 2)}}</strong></p>
         <form action="" method="post" id="loginForm">
             <div class="inputFieldWrapper">
-                <i class="fa-solid fa-wallet"></i>
+                <i class="fa-solid fa-dollar"></i>
                 <input class="inputField inputFieldJs" type="number" placeholder="Amount in Dollars" required name="added_wallet_balance" id="phoneInput" min="1">
+            </div>
+            <div class="radioContainer">
+                <input type="radio" name="send_as" id="radioSendAsRecharge" value="recharge" checked>
+                <label for="radioSendAsRecharge">Send as Recharge</label>
+            </div>
+            <div class="radioContainer">
+                <input type="radio" name="send_as" id="radioSendAsBonus" value="bonus">
+                <label for="radioSendAsBonus">Send as bonus</label>
             </div>
             <!-- <div class="inputFieldWrapper">
                 <i class="fa-solid fa-globe"></i>

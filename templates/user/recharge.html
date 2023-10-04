@@ -4,6 +4,40 @@
 
 {% block css %}
 <style>
+    #alertBox{
+        position: absolute;
+        height: 62%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        display: none;
+        box-sizing: border-box;
+        padding: 0px 40px;
+        row-gap: 49px;
+        background-color: #b78f00;
+        border-radius: 30px;
+    }
+    #alertBox span{
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+    #alertBox p, #alertBox a{
+        justify-self: center;
+    }
+    #alertBox a{
+        background-color: black;
+        border-color: black;
+    }
+    #alertBox *{
+        font-size: 1.2rem;
+    }
+    #alertBox p{
+        color: black;
+    }
+    #alertBox a{
+        color: white;
+    }
     #formContainer{
         height: 85vh;
         display: flex;
@@ -11,6 +45,9 @@
         align-items: center;
         justify-content: center;
         row-gap: 3vh;
+    }
+    p, label{
+        color: black;
     }
     #formContainer form{
         background-color: white;
@@ -28,16 +65,57 @@
         background: none;
         outline: none;
     }
+    /* The alert message box */
+.alert {
+  padding: 20px;
+  background-color: #15059b; /* Red */
+  color: white;
+  margin-bottom: 15px;
+}
+
+/* The close button */
+.closebtn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  font-size: 22px;
+  line-height: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* When moving the mouse over the close button */
+.closebtn:hover {
+  color: black;
+}
 </style>
 {% endblock css %}
 
 {% block main %}
 
 <div id="formContainer">
-    <h1>Enter recharge amount in Dollars and pay in USDT</h1>
-    <form action="" method="post">
-        <input type="number" name="amount" id="" placeholder="Recharge Amount(&dollar;)">
-        <button type="submit" class="btn btnNormal btnWithIcon">
+
+    <div class="alert" id="alertBox">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        <p>For Recharge via bank transfer, contact customer support on telegram by clicking the below link</p>
+        <a class="btn btnTrans" target="_blank" href="https://t.me/Influxglobal?start=Hi, I want to recharge my Influx Global Account via bank transfer. My user ID is {{user.user_id}}">Go to Telegram</a>
+      </div>
+
+    <h1>Enter recharge amount</h1>
+    <p style="color: white;">Minimum recharge is &dollar; 30</p>
+    <form action="" method="post" id="rechargeForm">
+        <input type="number" name="amount" id="amountInput" placeholder="Recharge Amount(&dollar;)" required min="30">
+        <p>Select payment method</p>
+        <div class="radioContainer">
+            <input type="radio" name="payment_method" id="radioCryptoPayment" value="TRC20" checked>
+            <label for="radioCryptoPayment">TRC20 (Crypto Payment)</label>
+        </div>
+        <div class="radioContainer">
+            <input type="radio" name="payment_method" id="radioBankTransfer" value="Bank Transfer">
+            <label for="radioBankTransfer">Bank Tansfer</label>
+        </div>
+        <button type="submit" class="btn btnNormal btnWithIcon" id="submitBtn">
             <i class="fa-solid fa-arrow-right-long"></i>
             <span>Continue</span>
         </button>
@@ -46,4 +124,35 @@
 
 {% endblock main %}
 
-{% block js %}{% endblock js %}
+{% block js %}
+<script>
+    let submitBtn = document.getElementById("submitBtn");
+    let rechargeForm = document.getElementById("rechargeForm");
+    let amountInput = document.getElementById("amountInput");
+    let alertBox = document.getElementById("alertBox");
+
+    submitBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        payment_radioList =  document.getElementsByName("payment_method");
+        // window.alert(`the payment method is ${payment_radio.value}`)
+        let bank_transfer_method = false
+        payment_radioList.forEach(radio => {
+            if(radio.checked && radio.value == "Bank Transfer"){
+                bank_transfer_method = true
+            }
+        });
+        if (!amountInput.checkValidity()){
+            amountInput.reportValidity();
+        }
+        else if(amountInput.checkValidity()){
+            if (bank_transfer_method) {
+                // window.alert("For bank transfer, contact Customer support");
+                alertBox.style.display = "flex";
+            }
+            else{
+                rechargeForm.submit();
+            }
+        }
+    })
+</script>
+{% endblock js %}

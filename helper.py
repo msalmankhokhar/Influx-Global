@@ -269,7 +269,10 @@ def get_movie_img_src(movie_id_number):
 
 # http://img.omdbapi.com/?apikey=31f1d24c&i=tt3896198
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import pytz
+
+timezone_dict = dict(pytz.country_timezones)
 
 def get_readable_date_string(rawDateString:str):
     dateFormat = '%Y-%m-%d-%H-%M'
@@ -277,10 +280,15 @@ def get_readable_date_string(rawDateString:str):
     beautiful_time_string = datetimeObj.strftime('%I : %M %p %d %b %Y')
     return beautiful_time_string
 
-def raw_dateString_to_dateObj(rawDateString:str):
+def raw_dateString_to_dateObj(rawDateString:str, timezone_offset:int=None):
     dateFormat = '%Y-%m-%d-%H-%M'
     datetimeObj = datetime.strptime(rawDateString, dateFormat)
-    return datetimeObj
+    if timezone_offset == None:
+        return datetimeObj
+    else:
+        fixedOffsetObj = pytz._FixedOffset(-timezone_offset)
+        dateObjeWithTimeZone = fixedOffsetObj.localize(datetimeObj)
+        return dateObjeWithTimeZone
 
 def dateObj_to_raw_dateString(dateObj):
     rawDate_string = dateObj.strftime('%Y-%m-%d-%H-%M')
@@ -292,8 +300,8 @@ def get_endTime_rawString(purchaeTime_rawString:str, movie_release_date, categor
         # dateObj_final = dateObj + timedelta(minutes=3)
         dateObj_final = datetime(movie_release_date, "%d %b %Y")
     elif presale == False and category == '24 hour':
-        dateObj_final = dateObj + timedelta(hours=24)
-        # dateObj_final = dateObj + timedelta(minutes=3)
+        # dateObj_final = dateObj + timedelta(hours=24)
+        dateObj_final = dateObj + timedelta(minutes=5)
     elif presale == False and category == 'weekly':
         dateObj_final = dateObj + timedelta(days=7)
     rawDateString_final = dateObj_to_raw_dateString(dateObj_final)
