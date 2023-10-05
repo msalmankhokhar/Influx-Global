@@ -1169,4 +1169,4 @@ scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=
 scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc, replace_existing=True)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
