@@ -15,14 +15,13 @@ import pytz
 from flask_apscheduler import APScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from multiprocessing import Process
 
 app = Flask(__name__)
 # run_with_ngrok(app)
 app.secret_key = 'salman khokhar'
-app_restarted = False
+app_restarted = True
 
 try:
     app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
@@ -35,20 +34,33 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # setting up scheduler
-# app.config['SCHEDULER_API_ENABLED'] = True
 
 class apSchedulerConfig:
-    SCHEDULER_JOBSTORES = {"default": SQLAlchemyJobStore(url="sqlite:///jobstore.sqlite")}
+    SCHEDULER_JOBSTORES = {"default": SQLAlchemyJobStore(url="sqlite:///jobstore_bg.sqlite")}
     # SCHEDULER_JOBSTORES = {"default": MemoryJobStore()}
 
     SCHEDULER_EXECUTORS = {"default": {"type": "threadpool", "max_workers": 1000}}
     # SCHEDULER_EXECUTORS = {"default": {"type": "processpool", "max_workers": 61}}
     # SCHEDULER_JOB_DEFAULTS = {"coalesce": False, "max_instances": 3}
     SCHEDULER_API_ENABLED = True
-# scheduler = APScheduler(app=app)
 
 app.config.from_object(apSchedulerConfig())
-scheduler_main = APScheduler(scheduler=BackgroundScheduler(), app=app)
+scheduler_bg = APScheduler(scheduler=BackgroundScheduler(), app=app)
+scheduler_bg.start()
+
+config_for_main_scheduler = {
+    'apscheduler.jobstores.default': {
+        'type': 'sqlalchemy',
+        'url': 'sqlite:///jobstore.sqlite'
+    },
+    'apscheduler.executors.default': {
+        'class': 'apscheduler.executors.pool:ThreadPoolExecutor',
+        'max_workers': '1000'
+    }
+}
+
+scheduler_main = BackgroundScheduler(config_for_main_scheduler)
+scheduler_main.start()
 
 class users(db.Model):
     user_id = db.Column(db.String(50), primary_key=True, nullable=False)
@@ -206,6 +218,8 @@ def user():
                     }
                 purchased_tickets = json.loads(selected_user.purchased_tickets)
                 purchasedMoviesList = [ d["movie_id"] for d in purchased_tickets if d["status"] == "in progress" ]
+                print(f"sceduler main running status is {scheduler_main.running}")
+                print(f"sceduler bg running status is {scheduler_bg.running}")
                 return render_template("user/home.html", moviesList=moviesList, user=selected_user, priceDict=priceDict, randint=randint, purchasedMoviesList=purchasedMoviesList, currentPagespanText="Home", currentMCategoryspanText=currentMCategoryspanText)
             else:
                 session.pop("user")
@@ -343,17 +357,19 @@ def buy_ticket():
             # scheduler.add_job(func=return_capital_amount, trigger='date', id=func_id, run_date=end_time_obj, args=[selected_user.user_id, data])
 
             # global scheduler_main
+            # scheduler_main.pause()
             if purchased_using == "Wallet Balance":
-                scheduler_main.add_job(func=return_capital_amount, trigger='date', run_date=end_time_obj, args=[selected_user.user_id, data, func_id_return_dailyProfit, data_index], id=func_id_return_capital, timezone=user_country_timezone)
+                scheduler_bg.add_job(func=return_capital_amount, trigger='date', run_date=end_time_obj, args=[selected_user.user_id, data, func_id_return_dailyProfit, data_index], id=func_id_return_capital, timezone=user_country_timezone)
             # date_today = datetime.now(tz=pytz.timezone(timezone_dict[selected_user.country][0]))
             # end_time_obj_for_dailyProfitFunc = end_time_obj + timedelta(hours=24)
             # end_time_obj_for_dailyProfitFunc = end_time_obj + timedelta(hours=24)
             # run_time_obj_for_dailyProfitFunc = end_time_obj - timedelta(minutes=3)
             end_time_obj_for_dailyProfitFunc = end_time_obj - timedelta(minutes=3)
-            scheduler_main.add_job(func=return_daily_profit, trigger='cron', start_date=purchase_time_obj, end_date=end_time_obj_for_dailyProfitFunc, hour=end_time_obj_for_dailyProfitFunc.hour, minute=end_time_obj_for_dailyProfitFunc.minute,second=end_time_obj_for_dailyProfitFunc.second, args=[selected_user.user_id, data], id=func_id_return_dailyProfit, timezone=user_country_timezone)
+            scheduler_bg.add_job(func=return_daily_profit, trigger='cron', start_date=purchase_time_obj, end_date=end_time_obj_for_dailyProfitFunc, hour=end_time_obj_for_dailyProfitFunc.hour, minute=end_time_obj_for_dailyProfitFunc.minute,second=end_time_obj_for_dailyProfitFunc.second, args=[selected_user.user_id, data], id=func_id_return_dailyProfit, timezone=user_country_timezone)
             print(f"added jobs for returning daily profit and capital amount for user timezone {user_country_timezone}")
             # scheduler_main.remove_all_jobs()
             print("sceduler function successfully")
+            # scheduler_main.resume()
             # @scheduler.task(trigger='date', id=f"{selected_user.user_id}_{movie_id}", run_date=end_time_obj, args=[selected_user.user_id, data])
             
             db.session.commit()
@@ -399,6 +415,8 @@ def user_account():
                 return redirect("/")
         else:
             return redirect("/")
+        
+
 def filteredOrderedMoviesList(moviesList):
     moviesListFiltered = [ e for e in moviesList if movies.query.filter_by(imdb_movie_id=e["movie_id"]).first() != None ]
     if len(moviesListFiltered) < len(moviesList):
@@ -432,7 +450,7 @@ def user_orders():
                 priceDict = {
     "24 hour": {"price":3, "profit":user_level.daily_ticket_profit, "duration": "24 Hours", "duration_days":1},
     "weekly": {"price":5, "profit":user_level.weekly_ticket_profit, "duration": "1 week (7 days)", "duration_days":7},
-    "pre sale": {"price":5, "profit":user_level.presale_ticket_profit, "duration": "1 month", "duration_days":30}
+    "pre sale": {"price":5, "profit":user_level.presale_ticket_profit, "duration": "Till movie release date", "duration_days":30}
     }
                 return render_template("user/orders.html", user=selected_user, moviesList=moviesListFiltered, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders", round=round)
             else:
@@ -742,7 +760,7 @@ def admin_logout():
 # Setting up twilio SMS API
 
 account_sid = "AC924e416b403ccc4141fb1d9f8338e1b7"
-auth_token = "bd73b0343bc7f90fb6da4a692cccbff6"
+auth_token = "5c5f664f7d23bf5c6a874514652e5183"
 # verify_sid = "VA5ce6d856cdcd9d51386fbd1a80f7f028"
 verify_sid = "VA4201478c0248e1989483892363837206"
 verified_number = "+923186456552"
@@ -798,7 +816,7 @@ def verifyUserPhoneNumber(phoneNumber):
             end_time_obj = datetime.now() + timedelta(hours=24)
 
             func_id_Destroy_exp_money = f"Destroy_exp_money_{pending_user.user_id}"
-            scheduler_main.add_job(func=destroy_experience_money, trigger='date', run_date=end_time_obj, args=[pending_user.user_id], id=func_id_Destroy_exp_money)
+            scheduler_bg.add_job(func=destroy_experience_money, trigger='date', run_date=end_time_obj, args=[pending_user.user_id], id=func_id_Destroy_exp_money)
             session.pop("pending_user")
             if upgradeUserLevel(invitor_user.user_id):
                 db.session.commit()
@@ -966,7 +984,7 @@ def add_user_mannaul():
                         db.session.commit()
                         end_time_obj = datetime.today() + timedelta(hours=24)
                         func_id_Destroy_exp_money = f"Destroy_exp_money_{new_user.user_id}"
-                        scheduler_main.add_job(func=destroy_experience_money, trigger='date', run_date=end_time_obj, args=[new_user.user_id], id=func_id_Destroy_exp_money)
+                        scheduler_bg.add_job(func=destroy_experience_money, trigger='date', run_date=end_time_obj, args=[new_user.user_id], id=func_id_Destroy_exp_money)
                         return redirect('/admin/all_users')
                     else:
                         return "Referal code is not valid. Please enter a valid referal/invitation code"
@@ -1145,17 +1163,10 @@ def minus_wallet_balance(userId):
         db.session.commit()
         return redirect("/admin/all_users")
 
-# def start_scheduler():
-#     print("starting scheduler")
-#     scheduler_main.start()
-#     print("started scheduler successfully")
 
+# adding scheduled jobs for reseting users daily and monthly earning
+scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc, replace_existing=True)
+scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc, replace_existing=True)
 
 if __name__ == "__main__":
-    # scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc )
-    # scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc )
-    scheduler_main.start()
-    # start_scheduler = scheduler_main.start
-    # schedular_start_process = Process(target=scheduler_main.start(), name="schedular_starter_process")
-    # schedular_start_process.start()
     app.run(host='0.0.0.0', port=5000, debug=True)

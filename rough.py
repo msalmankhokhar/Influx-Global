@@ -218,5 +218,6 @@ country_name = abbrev_to_country['TH']
 # for key in mydict:
 #     print(f"Key is {key} and value is {mydict[key]}")
 timezone = pytz.timezone(timezone_dict['TH'][0])
-print(datetime.now(tz=timezone))
-print(f"timezone is {timezone}")
+# print(datetime.now(tz=timezone))
+# print(f"timezone is {timezone}")
+print(datetime.strptime("20 Dec 2023", "%d %b %Y"))
