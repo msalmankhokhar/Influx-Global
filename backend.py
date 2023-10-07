@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask import Flask, render_template, request, session, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from helper import country_to_abbrev, abbrev_to_country, get_movie_details, get_movie_img_src, get_readable_date_string, get_endTime_rawString, raw_dateString_to_dateObj, dateObj_to_raw_dateString, timezone_dict
@@ -17,6 +17,7 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from multiprocessing import Process
+import os
 
 app = Flask(__name__)
 # run_with_ngrok(app)
@@ -387,7 +388,7 @@ def movie_quantity():
             daily_profit_percent = request.args.get("daily_profit_percent")
             movie = get_movie_details_from_ID(movie_id=movie_id)
             userLevel = levels.query.get(user.level)
-            return render_template("user/quantity.html", ticket_price=ticket_price, movie=movie, user=user, daily_profit_percent=daily_profit_percent, userLevel=userLevel)
+            return render_template("user/quantity.html", ticket_price=ticket_price, movie=movie, user=user, daily_profit_percent=daily_profit_percent, userLevel=userLevel, round=round)
             # return movie
         else:
             return redirect("/")
@@ -409,7 +410,7 @@ def user_account():
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
                 level_upgrade_string = generate_level_upgrade_string(selected_user.level)
-                return render_template("user/account.html", user=selected_user, level_upgrade_string=level_upgrade_string, currentPagespanText="Account")
+                return render_template("user/account.html", user=selected_user, level_upgrade_string=level_upgrade_string, currentPagespanText="Account", round=round)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -1162,6 +1163,11 @@ def minus_wallet_balance(userId):
         selected_user.wallet_balance -= minused_wallet_balance
         db.session.commit()
         return redirect("/admin/all_users")
+
+# addding favicon
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static/img/favicons'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 # adding scheduled jobs for reseting users daily and monthly earning

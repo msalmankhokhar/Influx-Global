@@ -81,7 +81,8 @@ nav{
 }
 
 .navlink.navlinkWithIcon.selected{
-    background-color: #b37c00;
+    /* background-color: #b37c00; */
+    background-color: #bd6903;
 }
 
 .navlink.navlinkWithIcon:hover{
@@ -123,8 +124,10 @@ nav{
 }
 
 .btn.btnTrans.movieCategoryBtn.selected, .btn.btnTrans.movieCategoryBtn:hover{
-    background-color: #b37c00;
-    border-color: #b37c00;
+    /* background-color: #b37c00;
+    border-color: #b37c00; */
+    background-color: #bd6903;
+    border-color: #bd6903;
 }
 
 .movieCard{

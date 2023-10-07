@@ -97,20 +97,20 @@
         {% if user.experience_money != None %}
         <div class="balanceContainer">
             <span class="heading">Experience Money</span>
-            <span class="text">&dollar; {{ round(user.experience_money, 3) }}</span>
+            <span class="text">&dollar; {{ round(user.experience_money, 2) }}</span>
         </div>
         <p>The Experience Money is valid till 24 hours after acccont creation. You can it to buy tickets and for practice (demo purposes)</p>
         {% endif %}
         <div class="balanceContainer">
             <span class="heading">Your Balance</span>
-            <span class="text">&dollar; {{ round(user.wallet_balance, 3) }}</span>
+            <span class="text">&dollar; {{ round(user.wallet_balance, 2) }}</span>
         </div>
 
         <span class="infoBlock">
-            Today's Earning <strong>&dollar; {{user.today_earning}}</strong>
+            Today's Earning <strong>&dollar; {{ round(user.today_earning, 2) }}</strong>
         </span>
         <span class="infoBlock">
-            Earning in this month <strong>&dollar; {{user.monthly_earning}}</strong>
+            Earning in this month <strong>&dollar; {{ round(user.monthly_earning, 2) }}</strong>
         </span>
     </div>
 

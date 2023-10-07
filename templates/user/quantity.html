@@ -45,6 +45,16 @@
         padding: 2% 4%;
     }
 
+    #preSalePurchaseLimitP{
+        align-self: center;
+        font-size: 0.9rem;
+        background-color: #a10000;
+        padding: 13px 16px;
+        border-radius: 11px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+    }
+
     @media screen and (max-width: 608px){
         .actions{
             flex-direction: column;
@@ -104,7 +114,12 @@
             <p>Release Date:</p>
             <p>{{movie['releaseDate']}}</p>
         </div>
-        <p>Minimum purchase limit for pre sale movies is {{userLevel.minimum_presale_tickets_buy}} Tickets</p>
+        {% if movie['placement'] == 'pre sale' %}
+        <p id="preSalePurchaseLimitP" class="btnWithIcon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span class="textCenter">Minimum purchase limit for pre sale movies is {{userLevel.minimum_presale_tickets_buy}} Tickets</span>
+            </p>
+        {% endif %}
         <div id="actions" class="actions">
             <label for="quantityInput">No. of tickets to buy</label>
             <div>

@@ -15,6 +15,8 @@
     <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"> -->
     <link rel="stylesheet" href="/static/css/comman.css">
     <link rel="stylesheet" href="/static/css/home/style.css">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 
 {% block css %}{% endblock css %}
@@ -78,19 +80,19 @@
         <section id="introSection" class="mainSection">
             <div class="content">
                 <div class="left">
-                    <h1 class="sectionHeading textCenter">Company Introduction</h1>
-                    <div class="imgContainer">
+                    <h1 class="sectionHeading textCenter" >Company Introduction</h1>
+                    <div class="imgContainer" >
                         <img src="{{ url_for('static', filename='img/logos/Png/Influx-global-logo-Final-Files-04.png') }}" alt="">
                     </div>
                 </div>
                 <div class="right">
-                    <div class="imgContainer">
+                    <div class="imgContainer" >
                         <img src="https://upload.wikimedia.org/wikipedia/commons/7/72/Zoetrope_Bldg_%26_Transamerica.JPG"
                             alt="">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Hollywood_Sign_%28Zuschnitt%29.jpg/1024px-Hollywood_Sign_%28Zuschnitt%29.jpg"
                             alt="">
                     </div>
-                    <p class="sectionParaGraph customFontSize">Influx Global was founded in 2020. It is a subsidiary of
+                    <p class="sectionParaGraph customFontSize" >Influx Global was founded in 2020. It is a subsidiary of
                         America Film-world, specializing in promoting movies through pre-sales, announcements, and other
                         means before their release, making them well-known and ensuring that all members have access to
                         global movie news and can participate in movie promotion and receive investment returns.</p>
@@ -100,15 +102,15 @@
         <!-- <hr> -->
 
         <section id="earnSection" class="mainSection">
-            <h1 class="sectionHeading textCenter">Earn Money with <span>Influx Global</span></h1>
-            <div class="text">
+            <h1 class="sectionHeading textCenter" >Earn Money with <span>Influx Global</span></h1>
+            <div class="text" >
                 <p class="sectionParaGraph customFontSize">Influx Global has partnerships with movie theaters around the
                     world. Users can purchase pre-sale movie tickets and daily movie tickets through the Influx Global
                     application, which helps the movies increase their box office performance, thereby increasing their
                     popularity and success in the market. As a result, the movie's producer pays Influx Global a certain
                     amount of promotion and advertising fees. Users can earn income through Influx Global's loyalty
                     reward program, member level system, and team income plan while supporting the movie industry.</p>
-                <div class="btnsContainer">
+                <div class="btnsContainer" >
                     <a href="" class="btn btnNormal">Learn more about earning plan</a>
                     <a href="" class="btn btnTrans">Register Yourself</a>
                 </div>
@@ -123,10 +125,10 @@
         <div class="content">
             <div class="footerSection contact">
                 <!-- <h1>Contact Us</h1> -->
-                <h1>Contact us on Telegram for any queries</h1>
+                <h1 >Contact us on Telegram for any queries</h1>
                 <div class="content">
                     <div>
-                        <a class="btn btnWithIcon" target="_blank" href="https://t.me/Influxglobal">
+                        <a class="btn btnWithIcon" target="_blank" href="https://t.me/Influxglobal" >
                             <!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                 class="bi bi-telegram" viewBox="0 0 16 16">
                                 <path
@@ -147,6 +149,7 @@
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script> -->
 </body>
 <script src="https://kit.fontawesome.com/7d3f73a100.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script src="/static/js/script.js"></script>
 <script>
     let menuBtn = document.getElementById("navMenuBtn");
@@ -164,5 +167,8 @@
 </script>
 {% block js %}
 {% endblock js %}
+<script>
+    AOS.init();
+</script>
 
 </html>

@@ -165,8 +165,8 @@
         </div>
         <div class="levelSection">
             <span class="level infoBlock">Level VIP {{user.level}}</span>
-            <span class="">Total earning <strong>&dollar; {{user.overall_earning}}</strong></span>
-            <span class="">Overall Deposit <strong>&dollar; {{user.overall_deposit}}</strong></span>
+            <span class="">Total earning <strong>&dollar; {{ round(user.overall_earning, 2) }}</strong></span>
+            <span class="">Overall Deposit <strong>&dollar; {{ round(user.overall_deposit, 2) }}</strong></span>
             <span class="">Total Referals <strong>{{user.overall_referals}}</strong></span>
             <p>{{level_upgrade_string}}</p>
         </div>
