@@ -643,7 +643,7 @@ def user_recharge():
         order_id = session["user"]
         invoice_request = CreateInvoiceRequest(
             app_id=unipayment_app_id,
-            title='Recharge Wallet | Influx Global',
+            title='Recharge Wallet - Influx Global',
             lang='en-US',
             price_amount=amount,
             price_currency='USD',

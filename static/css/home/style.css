@@ -80,7 +80,7 @@ nav{
     /* background-color: #00000057; */
     /* background-color: #00000059; */
     /* background-color: #000000b8; */
-    background: linear-gradient(45deg, black, transparent);
+    background: linear-gradient(90deg, transparent, black, transparent);
     background-color: #02151e;
     backdrop-filter: blur(8px);
 }
