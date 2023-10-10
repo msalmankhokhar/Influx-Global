@@ -205,3 +205,19 @@ span.paymentReqStatus.pending{
 span.paymentReqStatus.complete{
     background-color: #5af36d;
 }
+
+
+span.userACStatus{
+    color: black;
+    padding: 9px;
+    border-radius: 5px;
+}
+span.userACStatus.notv{
+    background-color: #f9a6a6;
+}
+span.userACStatus.pending{
+    background-color: #f1f9a6;
+}
+span.userACStatus.verified{
+    background-color: #5af36d;
+}

@@ -15,13 +15,18 @@
 
     .walletMain{
         /* background: linear-gradient(90deg, #180848, #06101c, #180848); */
-        background: linear-gradient(90deg, #483b08, #7d7e0a, #483b08);
+        /* background: linear-gradient(90deg, #483b08, #7d7e0a, #483b08); */
+
+        background: linear-gradient(45deg, black, transparent);
+        background-color: #505050a6;
+
         display: flex;
         flex-direction: column;
         border-radius: 15px;
         padding: 35px;
         align-items: center;
         row-gap: 10px;
+        border: 1px solid #484848;
     }
 
     .walletMain p{
@@ -69,22 +74,42 @@
     }
 
     span strong {
-        color: yellow;
+        color: #ffd400;
         margin-left: 20px;
     }
 
     .infoBlock {
         padding: 10px 15px;
-        background-color: #003e6a;
+        /* background-color: #003e6a; */
+        background-color: #6a3600;
         border-radius: 30px;
+    }
+    .amountBlock{
+        /* border: 1px solid #878787; */
+        /* padding: 30px; */
+        padding: 25px 20px;
+        min-width: 219px;
+        border-radius: 10px;
+        background-color: #303030;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        box-shadow: 1px 1px 1px black;
+        column-gap: 20px;
+        row-gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
     }
     @media screen and (max-width: 550px) {
         span strong{
             margin: 0px;
         }
-    }
-    #alertBox{
-        background-color: #15059b;
+        .container{
+            padding-top: 5vh;
+            padding-bottom: 20vh;
+            padding-right: 5vw;
+            padding-left: 5vw;
+        }
     }
 </style>
 {% endblock css %}
@@ -106,10 +131,10 @@
             <span class="text">&dollar; {{ round(user.wallet_balance, 2) }}</span>
         </div>
 
-        <span class="infoBlock">
+        <span class="amountBlock">
             Today's Earning <strong>&dollar; {{ round(user.today_earning, 2) }}</strong>
         </span>
-        <span class="infoBlock">
+        <span class="amountBlock">
             Earning in this month <strong>&dollar; {{ round(user.monthly_earning, 2) }}</strong>
         </span>
     </div>

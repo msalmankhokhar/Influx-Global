@@ -1,0 +1,7 @@
+values for account_status in users class:
+
+non-verified
+Pending
+Verified
+
+name of folder containing user id docs user-Identity-docs

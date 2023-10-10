@@ -15,8 +15,9 @@
     }
 
     span strong {
-        color: yellow;
-        margin-left: 20px;
+        color: #ffd400;
+        /* margin-left: 20px; */
+        font-size: 1.2rem;
     }
 
     .userId {
@@ -32,9 +33,14 @@
     }
 
     #profileContainer {
+        border: 1px solid #484848;
         position: relative;
         /* background: linear-gradient(90deg, #180848, #06101c, #180848); */
-        background: linear-gradient(90deg, #483b08, #7d7e0a, #483b08);
+        /* background: linear-gradient(90deg, #483b08, #7d7e0a, #483b08); */
+
+        background: linear-gradient(45deg, black, transparent);
+        background-color: #505050a6;
+
         padding: inherit;
         border-radius: inherit;
         display: flex;
@@ -55,7 +61,8 @@
 
     .profilePicWrapper {
         border-radius: 100%;
-        background-color: #0a4c9f;
+        /* background-color: #0a4c9f; */
+        background-color: #6a3600;
         padding: 5px;
         display: flex;
         align-items: center;
@@ -67,6 +74,11 @@
     .profilePicWrapper span {
         font-weight: bold;
         font-size: 3rem;
+    }
+
+    span.name{
+        font-weight: bold;
+        font-size: 1.3rem;
     }
 
     .levelSection {
@@ -85,8 +97,36 @@
 
     .infoBlock {
         padding: 10px 15px;
-        background-color: #003e6a;
+        /* background-color: #003e6a; */
+        background-color: #6a3600;
         border-radius: 30px;
+        font-size: 0.9rem;
+    }
+
+    .amountBlock{
+        /* border: 1px solid #878787; */
+        /* padding: 30px; */
+        padding: 25px 20px;
+        min-width: 200px;
+        border-radius: 10px;
+        background-color: #303030;
+        font-size: 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        box-shadow: 1px 1px 1px black;
+        column-gap: 20px;
+        row-gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .rCode{
+        font-weight: bold;
+        /* color: #ffd400; */
+        color: black;
+        background-color: white;
+        padding: 10px;
+        border-radius: 3px;
     }
 
     .levelSection .level {
@@ -126,6 +166,43 @@
         flex-wrap: wrap;
     }
 
+    #verificationBox{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    #verificationBox .title{
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    span.btnWithIcon{
+        background-color: white;
+        padding: 8px 13px;
+        border-radius: 30px;
+    }
+    span.btnWithIcon i{
+        line-height: 0px;
+    }
+    span.btnWithIcon span{
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    .v-box-non-verified i, .v-box-non-verified span span{
+        color: rgb(255, 25, 25);
+    }
+    .v-box-non-verified i{
+        font-size: 1.3rem;
+    }
+    .v-box-Pending i, .v-box-Pending span span{
+        color: #cb7a00;
+    }
+    .v-box-Verified i, .v-box-Verified span span{
+        color: green;
+    }
+    .v-box-Verified i{
+        font-size: 1.3rem;
+    }
+
     @media screen and (max-width: 1431px) {
         #profileContainer div{
             margin: 15px 0px ;
@@ -147,6 +224,15 @@
             top: unset;
             bottom: 20px;
         }
+        .amountBlock{
+            justify-content: center;
+        }
+        .container{
+            padding-top: 5vh;
+            padding-bottom: 20vh;
+            padding-right: 5vw;
+            padding-left: 5vw;
+        }
     }
 </style>
 {% endblock css %}
@@ -154,6 +240,24 @@
 {% block main %}
 
 <div class="container" id="accountContainer">
+
+    <div id="verificationBox" class="v-box-{{user.account_status}}">
+        <span class="title">Verification Status</span>
+        <span class="btnWithIcon">
+            {% if user.account_status == 'non-verified' %}
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {% elif user.account_status == 'Pending' %}
+            <i class="fa-solid fa-hourglass-end"></i>
+            {% elif user.account_status == 'Verified' %}
+            <i class="fa-solid fa-circle-check"></i>
+            {% endif %}
+            <span>{{user.account_status}}</span>
+        </span>
+    </div>
+    
+    {% if user.account_status == 'non-verified' %}
+    <a href="/verify-user-identity" class="btn btnNormal btnWithIcon">Click here to verify your identity and upgrade your account</a>
+    {% endif %}
 
     <div id="profileContainer">
         <div class="profileSection">
@@ -165,16 +269,16 @@
         </div>
         <div class="levelSection">
             <span class="level infoBlock">Level VIP {{user.level}}</span>
-            <span class="">Total earning <strong>&dollar; {{ round(user.overall_earning, 2) }}</strong></span>
-            <span class="">Overall Deposit <strong>&dollar; {{ round(user.overall_deposit, 2) }}</strong></span>
-            <span class="">Total Referals <strong>{{user.overall_referals}}</strong></span>
+            <span class="amountBlock">Total earning <strong>&dollar; {{ round(user.overall_earning, 2) }}</strong></span>
+            <span class="amountBlock">Overall Deposit <strong>&dollar; {{ round(user.overall_deposit, 2) }}</strong></span>
+            <span class="amountBlock">Total Referals <strong>{{user.overall_referals}}</strong></span>
             <p>{{level_upgrade_string}}</p>
         </div>
         
     </div>
     <div class="referalCodeWrapper levelSection">
-        <span class="infoBlock">
-            Referal Code <strong>{{user.selfReferalCode}}</strong>
+        <span class="amountBlock">
+            Referal Code <div class="rCode">{{user.selfReferalCode}}</div>
         </span>
         <button id="refLinKCopyBtn" class="btn btnTrans btnWithIcon">
             <i class="fa-solid fa-copy"></i>

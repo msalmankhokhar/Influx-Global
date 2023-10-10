@@ -1,0 +1,54 @@
+{% extends 'user/home.html' %}
+
+{% block title %}Verify User ID{% endblock title %}
+
+{% block css %}
+<style>
+    #verifyUserIdentityFormContainer{
+        display: flex;
+        flex-direction: column;
+        row-gap: 5vh;
+    }
+    #verifyUserIdentityForm{
+        flex-direction: column;
+        display: flex;
+        row-gap: 3vh;
+    }
+    .imageInput{
+        padding: 20px;
+        border: 1px solid #959595;
+        border-radius: 5px;
+        color: black;
+    }
+    label{
+        color: black;
+        font-weight: bold;
+    }
+    .inputContainer{
+        display: flex;
+        flex-direction: column;
+        row-gap: 3px;
+    }
+</style>
+{% endblock css %}
+
+{% block main %}
+
+<div id="verifyUserIdentityFormContainer" class="container">
+    <h1 class="textCenter">Verify your national identity</h1>
+    <p class="textCenter">Upload picture of front and back side of your national identity card/document</p>
+    <form action="" method="post" enctype="multipart/form-data" id="verifyUserIdentityForm">
+        <div class="inputContainer">
+            <label for="frontInput">Front Side</label>
+            <input type="file" name="front" id="" class="imageInput" required placeholder="front" id="frontInput" accept="image/png, image/jpeg">
+        </div>
+        <div class="inputContainer">
+            <label for="backInput">Front Back</label>
+            <input type="file" name="back" id="" class="imageInput" required placeholder="back" id="backInput" accept="image/png, image/jpeg">
+        </div>
+        <button class="btn btnNormal" type="submit">Submit</button>
+    </form>
+</div>
+
+{% endblock main %}
+

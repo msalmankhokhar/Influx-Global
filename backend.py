@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from werkzeug.utils import secure_filename
 from helper import country_to_abbrev, abbrev_to_country, get_movie_details, get_movie_img_src, get_readable_date_string, get_endTime_rawString, raw_dateString_to_dateObj, dateObj_to_raw_dateString, timezone_dict
 from random import randint, choices
 from phonenumbers import parse, is_valid_number, is_possible_number, NumberParseException, country_code_for_region
@@ -22,7 +23,12 @@ import os
 app = Flask(__name__)
 # run_with_ngrok(app)
 app.secret_key = 'salman khokhar'
-app_restarted = True
+app_restarted = False
+
+# files upload configration
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+USER_ID_DOCS_FOLDER = 'static/uploads/user-Identity-docs'
 
 try:
     app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
@@ -69,6 +75,7 @@ class users(db.Model):
     phone = db.Column(db.String(50), nullable=False, unique=True)
     password = db.Column(db.String(50), nullable=False, unique=False)
     country = db.Column(db.String(20), nullable=False, unique=False)
+    account_status = db.Column(db.String(20), nullable=True, unique=False)
     selfReferalCode = db.Column(db.String(50), nullable=False, unique=True)
     joiningReferalCode = db.Column(db.String(50), nullable=False, unique=False)
     level = db.Column(db.Integer, nullable=False, unique=False)
@@ -101,15 +108,15 @@ class paymentResquests(db.Model):
 class levels(db.Model):
     level_number = db.Column(db.Integer, primary_key=True, nullable=False)
 
-    minimum_overall_deposit = db.Column(db.Integer, nullable=True, unique=False)
+    minimum_overall_deposit = db.Column(db.Float, nullable=True, unique=False)
     minimum_overall_invitation = db.Column(db.Integer, nullable=True, unique=False)
 
-    daily_ticket_profit = db.Column(db.Integer, nullable=True, unique=False)
-    weekly_ticket_profit = db.Column(db.Integer, nullable=True, unique=False)
-    presale_ticket_profit = db.Column(db.Integer, nullable=True, unique=False)
+    daily_ticket_profit = db.Column(db.Float, nullable=True, unique=False)
+    weekly_ticket_profit = db.Column(db.Float, nullable=True, unique=False)
+    presale_ticket_profit = db.Column(db.Float, nullable=True, unique=False)
 
     minimum_presale_tickets_buy = db.Column(db.Integer, nullable=True, unique=False)
-    minimum_purchase_value = db.Column(db.Integer, nullable=True, unique=False)
+    minimum_purchase_value = db.Column(db.Float, nullable=True, unique=False)
 class movies(db.Model):
     imdb_movie_id = db.Column(db.String(50), primary_key=True, nullable=False)
     title = db.Column(db.String, nullable=True, unique=False)
@@ -221,6 +228,8 @@ def user():
                 purchasedMoviesList = [ d["movie_id"] for d in purchased_tickets if d["status"] == "in progress" ]
                 print(f"sceduler main running status is {scheduler_main.running}")
                 print(f"sceduler bg running status is {scheduler_bg.running}")
+                if selected_user.account_status == 'non-verified':
+                    flash('Your account is not verified yet<br><br>After verification of your national ID, you will be able to recharge and purchare tickets', "idVerifyWarning")
                 return render_template("user/home.html", moviesList=moviesList, user=selected_user, priceDict=priceDict, randint=randint, purchasedMoviesList=purchasedMoviesList, currentPagespanText="Home", currentMCategoryspanText=currentMCategoryspanText)
             else:
                 session.pop("user")
@@ -294,6 +303,12 @@ def return_daily_profit(user_id, data):
 @app.route("/user/buy_ticket", methods=["GET"])
 def buy_ticket():
     if request.method == "GET" and "user" in session:
+        selected_user = users.query.filter_by(user_id=session['user']).first()
+
+        if selected_user.account_status != "Verified":
+            flash("You need to verify your identity before you recharge credits and buy tickets<br><br>Upload your National ID card pictures here. Admins will review and approve your account. Once your account gets approved, you can recharge and start buying tickets")
+            return redirect("/verify-user-identity")
+        
         movie_id = request.args.get("movie_id")
         purchased_using = request.args.get("purchased_using")
         purchase_time = request.args.get("purchase_time")
@@ -303,7 +318,6 @@ def buy_ticket():
 
 
         selected_movie = movies.query.filter_by(imdb_movie_id=movie_id).first()
-        selected_user = users.query.filter_by(user_id=session['user']).first()
         user_country_timezone = pytz.timezone(timezone_dict[selected_user.country][0])
         selected_level = levels.query.filter_by(level_number=selected_user.level).first()
 
@@ -324,8 +338,12 @@ def buy_ticket():
             "pre sale" : selected_level.presale_ticket_profit
         }
 
-        estimated_daily_profit = (tickets_purchased * ticket_price) * (profitDict[selected_movie.placement] / 100)
         total_purchase_value = tickets_purchased * ticket_price
+        estimated_daily_profit = total_purchase_value * (profitDict[selected_movie.placement] / 100)
+        print(f"total purchase value is {total_purchase_value}")
+        print(f"profit percentage is {profitDict[selected_movie.placement]}")
+        print(f"profit percentage in decimal is {profitDict[selected_movie.placement]/100}")
+        print(f"estimated daily profit is {estimated_daily_profit}")
         data = {
             "movie_id" : movie_id,
             "purchase_time" : purchase_time,
@@ -366,7 +384,7 @@ def buy_ticket():
             # end_time_obj_for_dailyProfitFunc = end_time_obj + timedelta(hours=24)
             # run_time_obj_for_dailyProfitFunc = end_time_obj - timedelta(minutes=3)
             end_time_obj_for_dailyProfitFunc = end_time_obj - timedelta(minutes=3)
-            scheduler_bg.add_job(func=return_daily_profit, trigger='cron', start_date=purchase_time_obj, end_date=end_time_obj_for_dailyProfitFunc, hour=end_time_obj_for_dailyProfitFunc.hour, minute=end_time_obj_for_dailyProfitFunc.minute,second=end_time_obj_for_dailyProfitFunc.second, args=[selected_user.user_id, data], id=func_id_return_dailyProfit, timezone=user_country_timezone)
+            scheduler_bg.add_job(func=return_daily_profit, trigger='cron', start_date=purchase_time_obj, end_date=end_time_obj, hour=end_time_obj_for_dailyProfitFunc.hour, minute=end_time_obj_for_dailyProfitFunc.minute,second=end_time_obj_for_dailyProfitFunc.second, args=[selected_user.user_id, data], id=func_id_return_dailyProfit, timezone=user_country_timezone)
             print(f"added jobs for returning daily profit and capital amount for user timezone {user_country_timezone}")
             # scheduler_main.remove_all_jobs()
             print("sceduler function successfully")
@@ -473,6 +491,40 @@ def user_wallet():
                 return redirect("/")
         else:
             return redirect("/")
+        
+@app.route("/verify-user-identity", methods=["GET", "POST"])
+def verify_userIdentity():
+    if request.method == "GET":
+        if "user" in session:
+            user_id = session["user"]
+            selected_user = users.query.filter_by(user_id = user_id).first()
+            if selected_user:
+                return render_template("user/verifyID.html", user=selected_user, currentPagespanText="", round=round)
+            else:
+                session.pop("user")
+                return redirect("/")
+        else:
+            return redirect("/")
+    elif request.method == "POST":
+        user_id = session["user"]
+        selected_user = users.query.filter_by(user_id=user_id).first()
+        uploads_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], 'user-Identity-docs', user_id)
+        if not os.path.exists(uploads_folder_path):
+            os.mkdir(uploads_folder_path)
+        front = request.files['front']
+        back = request.files['back']
+        files = request.files
+        for key in files:
+            file = files[key]
+            file_extention = os.path.splitext(file.filename)[1]
+            filename = secure_filename(file.name + file_extention)
+            file.save(os.path.join(uploads_folder_path, filename))
+        # print(request.files)
+        # return f"files saved successfully in folder {uploads_folder_path}"
+        flash("Identity documents submitted successfully<br><br>Wait for admins to approve your account. Once your account gets verified, you can recharge credits and buy ticket. Approval may take 24 hours. In case of further delay, contact the customer support")
+        selected_user.account_status = "Pending"
+        db.session.commit()
+        return redirect("/user/account")
 
 def upgradeUserLevel(user_id):
     with app.app_context():
@@ -614,7 +666,7 @@ def user_get_account_details():
         except Exception as error:
             return error
         # return paymentRequestDict
-        flash(message="The admins have recieved your withdraw request. You will recieve the payment in 1-3 Days. In case of further delay, you can contact the constomer support")
+        flash(message="The admins have recieved your withdraw request. You will recieve the payment in 24 hours. In case of further delay, you can contact the constomer support")
         return redirect("/user/wallet")
 
 # setting up UniPayment API
@@ -630,7 +682,11 @@ def user_recharge():
     if request.method == "GET":
         if "user" in session:
             if selected_user:
-                return render_template("user/recharge.html", user=selected_user)
+                if selected_user.account_status == "Verified":
+                    return render_template("user/recharge.html", user=selected_user)
+                else:
+                    flash("You need to verify your identity before you recharge credits and buy tickets<br><br>Upload your National ID card pictures here. Admins will review and approve your account. Once your account gets approved, you can recharge and start buying tickets")
+                    return redirect("/verify-user-identity")
             else:
                 session.pop("user")
                 return redirect("/")
@@ -647,8 +703,8 @@ def user_recharge():
             lang='en-US',
             price_amount=amount,
             price_currency='USD',
-            redirect_url='https://www.influx-global.com/user/wallet',
-            notify_url='https://www.influx-global.com/user/wallet/verify_recharge',
+            redirect_url='https://influx-global.com/user/wallet',
+            notify_url='https://influx-global.com/user/wallet/verify_recharge',
             # redirect_url='http://127.0.0.1:5000/user/wallet',
             # notify_url='http://127.0.0.1:5000/user/wallet/verify_recharge',
             pay_currency='USDT',
@@ -802,7 +858,8 @@ def verifyUserPhoneNumber(phoneNumber):
                         purchased_tickets = '[]',
                         payment_requests = '[]',
                         today_earning = 0.0,
-                        monthly_earning = 0.0
+                        monthly_earning = 0.0,
+                        account_status = 'non-verified'
                     )
 
             db.session.add(pending_user)
@@ -977,7 +1034,8 @@ def add_user_mannaul():
                         purchased_tickets = '[]',
                         payment_requests = '[]',
                         today_earning = 0.0,
-                        monthly_earning = 0.0
+                        monthly_earning = 0.0,
+                        account_status = 'non-verified'
                     )
                     if invitor_user:
                         db.session.add(new_user)
@@ -1011,6 +1069,52 @@ def admin_all_users():
         if "adminuser" in session:
             usersList = users.query.all()
             return render_template('admin/users.html', usersList=usersList, round=round, currentNavlinkSpanText="Users", abbrev_to_country=abbrev_to_country)
+        else:
+            return redirect("/admin/login")
+
+def get_id_docsImg_srcList(user_id):
+    imgSrcList = []
+    folder = os.path.join(USER_ID_DOCS_FOLDER, user_id)
+    if os.path.exists(folder):
+        folder_contents_list = os.listdir(folder)
+        for filename in folder_contents_list:
+            img_src = os.path.join(folder, filename)
+            imgSrcList.append(f"/{img_src}")
+        return imgSrcList
+    else:
+        imgSrcList.append("None")
+        return imgSrcList
+
+@app.route("/admin/ID-Verification", methods=["GET"])
+def id_verifications():
+    if request.method == "GET":
+        if "adminuser" in session:
+            usersList = users.query.filter_by(account_status="Pending").all()
+            return render_template('admin/idVerification.html', usersList=usersList, round=round, currentNavlinkSpanText="ID Verification", abbrev_to_country=abbrev_to_country, get_id_docsImg_srcList=get_id_docsImg_srcList)
+        else:
+            return redirect("/admin/login")
+        
+@app.route("/admin/approve_user/<string:userid>", methods=["GET"])
+def admin_approveUser(userid):
+    if request.method == "GET":
+        if "adminuser" in session:
+            selected_user = users.query.filter_by(user_id=userid).first()
+            selected_user.account_status = "Verified"
+            db.session.commit()
+            flash("User identity documents approved successfully")
+            return redirect("/admin/ID-Verification")
+        else:
+            return redirect("/admin/login")
+        
+@app.route("/admin/reject_user/<string:userid>", methods=["GET"])
+def admin_rejectUser(userid):
+    if request.method == "GET":
+        if "adminuser" in session:
+            selected_user = users.query.filter_by(user_id=userid).first()
+            selected_user.account_status = "non-verified"
+            db.session.commit()
+            flash("User identity verification request has been declined")
+            return redirect("/admin/ID-Verification")
         else:
             return redirect("/admin/login")
     
@@ -1171,8 +1275,8 @@ def favicon():
 
 
 # adding scheduled jobs for reseting users daily and monthly earning
-scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc, replace_existing=True)
-scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc, replace_existing=True)
+# scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc, replace_existing=True)
+# scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc, replace_existing=True)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

@@ -14,6 +14,25 @@
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="myalert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">X</span>
+        <p>{{ message | safe }}</p>
+        {% if category == 'idVerifyWarning' %}
+        <a href="/verify-user-identity" class="btn btnNormal btnWithIcon">
+            <i class="up-right-from-square"></i>
+            <span>Verify Now</span>            
+        </a>
+        {% endif %}
+        
+    </div>
+    {% endfor %}
+  {% endif %}
+    {% endwith %}
+
     <div id="topBar">
         <a href="/admin" id="logoLink" class="textCenter">Influx Global <span>Admin Dashboard</span></a>
         <button id="menuBtn" class="btn btn-primary">
@@ -92,6 +111,10 @@
             <a href="/admin/withdraw_requests" class="navlink navlinkWithIcon">
                 <i class="fa-solid fa-dollar"></i>
                 <span>Withdraw</span>
+            </a>
+            <a href="/admin/ID-Verification" class="navlink navlinkWithIcon">
+                <i class="fa-solid fa-check"></i>
+                <span>ID Verification</span>
             </a>
             <a id="logoutBtn" href="/admin/logout" class="btn btn-danger btnWithIcon">
                 <i class="fa-solid fa-power-off"></i>

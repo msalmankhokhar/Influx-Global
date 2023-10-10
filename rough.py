@@ -220,4 +220,15 @@ country_name = abbrev_to_country['TH']
 timezone = pytz.timezone(timezone_dict['TH'][0])
 # print(datetime.now(tz=timezone))
 # print(f"timezone is {timezone}")
-print(datetime.strptime("20 Dec 2023", "%d %b %Y"))
+# print(datetime.strptime("20 Dec 2023", "%d %b %Y"))
+
+# percentage calculation:
+
+tickets_purchased = 13
+price_per_ticket = 3
+profit_percentage = 2.5
+total_prrchase_value = price_per_ticket * tickets_purchased
+print(f"total purchase value is {total_prrchase_value}")
+print(f"percentage in decimal is {profit_percentage/100}")
+estimated_daily_profit = total_prrchase_value * (profit_percentage/100)
+print(f"estimated dailty profit is {estimated_daily_profit}")

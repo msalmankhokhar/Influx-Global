@@ -14,6 +14,7 @@
                 <th scope="col">User ID</th>
                 <th scope="col">Level</th>
                 <th scope="col">Name</th>
+                <th scope="col">Account Status</th>
                 <th scope="col">Phone</th>
                 <th scope="col">Password</th>
                 <th scope="col">Country</th>
@@ -33,6 +34,14 @@
                 <td>{{user.user_id}}</td>
                 <td>{{user.level}}</td>
                 <td>{{user.name}}</td>
+                {% if user.account_status == "non-verified" %}
+                    <td><span class="userACStatus notv">{{ user.account_status }}</span></td>
+                {% elif user.account_status == "Pending" %}
+                    <td><span class="userACStatus pending">{{ user.account_status }}</span></td>
+                {% elif user.account_status == "Verified" %}
+                    <td><span class="userACStatus verified">{{ user.account_status }}</span></td>
+                {% endif %}
+                <td>{{user.account_status}}</td>
                 <td>{{user.phone}}</td>
                 <td>{{user.password}}</td>
                 <td>{{abbrev_to_country[user.country]}}</td>

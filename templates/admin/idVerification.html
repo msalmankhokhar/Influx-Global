@@ -1,0 +1,63 @@
+{% extends 'admin/movies.html' %}
+
+{% block title %}ID Verification Requests{% endblock title %}
+
+{% block main %}
+
+<h1 class="my-1 text-center">ID Verification Requests</h1>
+<!-- <a href="/admin/add_new_user" class="btn btn-success my-3">Add New User</a> -->
+<div class="tableWrapper">
+    <table id="moviesTable" class="table">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">User ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Country</th>
+                <th scope="col">ID Proof</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in usersList %}
+            <tr>
+                <td>{{ usersList.index(user) + 1 }}</td>
+                <td>{{user.user_id}}</td>
+                <td>{{user.name}}</td>
+                <td>{{user.phone}}</td>
+                <td>{{abbrev_to_country[user.country]}}</td>
+                <td>
+                    {% for imgSrc in get_id_docsImg_srcList(user.user_id) %}
+                    <a href="{{imgSrc}}"><img src="{{imgSrc}}" alt="ID Document" width="100"></a>
+                    {% endfor %}
+                </td>
+
+                <td style="display: flex; flex-direction: column;; row-gap: 5px;">
+                    <a href="/admin/approve_user/{{ user.user_id }}" class="btn btn-success actionBtn">Approve User</a>
+                    <a href="/admin/reject_user/{{ user.user_id }}" class="btn btn-danger actionBtn">Reject User</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock main %}
+
+{% block js %}
+<script>
+    let userDelBtnList = document.querySelectorAll(".actionBtn");
+
+    userDelBtnList.forEach(delBtn => {
+        delBtn.addEventListener('click', (e)=>{
+            e.preventDefault();
+            let confirmation = window.confirm(`Are you sure to continue ?`);
+            if(confirmation){
+                window.location.href = e.target.href;
+            }
+        })
+    });
+</script>
+{% endblock js %}
+</html>

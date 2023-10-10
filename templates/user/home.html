@@ -18,15 +18,21 @@
 
 <body>
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-    <div class="alert" id="alertBox">
-        <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-        {% for message in messages %}
-        <p>{{ message }}</p>
-        {% endfor %}
+    {% for category, message in messages %}
+    <div class="myalert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">X</span>
+        <p>{{ message | safe }}</p>
+        {% if category == 'idVerifyWarning' %}
+        <a href="/verify-user-identity" class="btn btnNormal btnWithIcon">
+            <i class="up-right-from-square"></i>
+            <span>Verify Now</span>            
+        </a>
+        {% endif %}
         
     </div>
+    {% endfor %}
   {% endif %}
     {% endwith %}
 
