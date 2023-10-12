@@ -67,7 +67,7 @@ config_for_main_scheduler = {
 }
 
 scheduler_main = BackgroundScheduler(config_for_main_scheduler)
-scheduler_main.start()
+# scheduler_main.start()
 
 class users(db.Model):
     user_id = db.Column(db.String(50), primary_key=True, nullable=False)
@@ -145,6 +145,7 @@ def get_movie_details_from_ID(movie_id):
         movieImgSrc = movie.img_src
     else:
         movieImgSrc = movieDetailsJson["Poster"]
+        # movieImgSrc = get_movie_img_src(movie.imdb_movie_id)
     movieObj = {
         "id" : movie.imdb_movie_id,
         "imgSrc" : movieImgSrc,
@@ -167,7 +168,8 @@ def generate_movie_details_obj(movie):
     if movie.img_src:
         movieImgSrc = movie.img_src
     else:
-        movieImgSrc = movieDetailsJson["Poster"]
+        # movieImgSrc = movieDetailsJson["Poster"]
+        movieImgSrc = get_movie_img_src(movie.imdb_movie_id)
     movieObj = {
         "id" : movie.imdb_movie_id,
         "imgSrc" : movieImgSrc,
@@ -237,13 +239,13 @@ def user():
         else:
             return redirect("/")
         
-def generate_level_upgrade_string(user_level:int):
+def generate_level_upgrade_string(user_level:int, user_current_referals:int):
     selected_level = levels.query.filter_by(level_number = user_level).first()
     next_level = levels.query.filter_by(level_number = (user_level+1)).first()
     if user_level > 0 and user_level < 7:
-        return f"Grow your overall deposit to {next_level.minimum_overall_deposit} and invite {next_level.minimum_overall_invitation} people and get level {next_level.level_number}"
+        return f"Grow your overall deposit to {next_level.minimum_overall_deposit} and invite {next_level.minimum_overall_invitation - user_current_referals} more people to aquire level {next_level.level_number}"
     elif user_level == 0:
-        return f"Make your first deposit of {next_level.minimum_overall_deposit} and get level {next_level.level_number}"
+        return f"Make your first deposit of {next_level.minimum_overall_deposit} to aquire level {next_level.level_number}"
     elif user_level == 7:
         return "You have the highest level on Influx Global"
     else:
@@ -288,15 +290,35 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
 def return_daily_profit(user_id, data):
     with app.app_context():
         selected_user = users.query.filter_by(user_id=user_id).first()
+        invitor_primary = users.query.filter_by(selfReferalCode = selected_user.joiningReferalCode).first()
+        invitor_secondary = users.query.filter_by(selfReferalCode = invitor_primary.joiningReferalCode).first()
         if selected_user:
             print("went in if (return daily profit)")
             estimated_daily_profit = data['estimated_daily_profit']
+
             selected_user.wallet_balance += estimated_daily_profit
             selected_user.today_earning += estimated_daily_profit
             selected_user.monthly_earning += estimated_daily_profit
             selected_user.overall_earning += estimated_daily_profit
-            db.session.commit()
             print(f'Returned {estimated_daily_profit} dollars in wallet of {selected_user.name} as daily profit')
+
+            if invitor_primary:
+                primary_profit = estimated_daily_profit * 0.1
+                invitor_primary.wallet_balance += primary_profit
+                invitor_primary.today_earning += primary_profit
+                invitor_primary.monthly_earning += primary_profit
+                invitor_primary.overall_earning += primary_profit
+                print(f'Returned {primary_profit} dollars in wallet of {invitor_primary.name} as daily referal profit')
+
+            if invitor_secondary:
+                secondary_profit = estimated_daily_profit * 0.05
+                invitor_secondary.wallet_balance += secondary_profit
+                invitor_secondary.today_earning += secondary_profit
+                invitor_secondary.monthly_earning += secondary_profit
+                invitor_secondary.overall_earning += secondary_profit
+                print(f'Returned {secondary_profit} dollars in wallet of {invitor_secondary.name} as daily referal profit')
+
+            db.session.commit()
         else:
             print("went in else (return daily profit)")
 
@@ -427,7 +449,7 @@ def user_account():
             user_id = session["user"]
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
-                level_upgrade_string = generate_level_upgrade_string(selected_user.level)
+                level_upgrade_string = generate_level_upgrade_string(selected_user.level, selected_user.overall_referals)
                 return render_template("user/account.html", user=selected_user, level_upgrade_string=level_upgrade_string, currentPagespanText="Account", round=round)
             else:
                 session.pop("user")
@@ -511,6 +533,12 @@ def verify_userIdentity():
         uploads_folder_path = os.path.join(app.config['UPLOAD_FOLDER'], 'user-Identity-docs', user_id)
         if not os.path.exists(uploads_folder_path):
             os.mkdir(uploads_folder_path)
+        elif os.path.exists(uploads_folder_path):
+            currentFiles = os.listdir(uploads_folder_path)
+            if len(currentFiles) > 0:
+                for file in currentFiles:
+                    os.remove(os.path.join(uploads_folder_path, file))
+
         front = request.files['front']
         back = request.files['back']
         files = request.files
@@ -1275,8 +1303,9 @@ def favicon():
 
 
 # adding scheduled jobs for reseting users daily and monthly earning
-# scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc, replace_existing=True)
-# scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc, replace_existing=True)
+scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc, replace_existing=True)
+scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0, minute=0, id="reset_monthlyEarning_job", timezone = pytz.utc, replace_existing=True)
+scheduler_main.start()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)

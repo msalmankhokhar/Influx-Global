@@ -35,13 +35,12 @@
                 <td>{{user.level}}</td>
                 <td>{{user.name}}</td>
                 {% if user.account_status == "non-verified" %}
-                    <td><span class="userACStatus notv">{{ user.account_status }}</span></td>
+                    <td class="btnsT"><span class="userACStatus notv">{{ user.account_status }}</span></td>
                 {% elif user.account_status == "Pending" %}
-                    <td><span class="userACStatus pending">{{ user.account_status }}</span></td>
+                    <td class="btnsT"><span class="userACStatus pending">{{ user.account_status }}</span></td>
                 {% elif user.account_status == "Verified" %}
-                    <td><span class="userACStatus verified">{{ user.account_status }}</span></td>
+                    <td class="btnsT"><span class="userACStatus verified">{{ user.account_status }}</span></td>
                 {% endif %}
-                <td>{{user.account_status}}</td>
                 <td>{{user.phone}}</td>
                 <td>{{user.password}}</td>
                 <td>{{abbrev_to_country[user.country]}}</td>
@@ -57,7 +56,7 @@
                 
                 <td>{{user.selfReferalCode}}</td>
                 <td>{{user.joiningReferalCode}}</td>
-                <td style="display: flex; flex-direction: row; column-gap: 5px;">
+                <td class="btnsTd">
                     <a href="/admin/add_wallet_balance/{{ user.user_id }}" class="btn btn-warning">Add Balance</a>
                     <a href="/admin/minus_wallet_balance/{{ user.user_id }}" class="btn btn-info">Deduct Balance</a>
                     <a href="/admin/delete_user/{{user.user_id}}" class="btn btn-danger userDelBtn">Delete User</a>

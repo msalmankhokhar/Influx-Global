@@ -185,7 +185,13 @@ div.tableWrapper{
     text-align: center;
     vertical-align: middle;
     font-size: 0.9rem;
-    min-width: 105px;
+    min-width: 125px;
+}
+
+#moviesTable td.btnsTd{
+    display: flex;
+    flex-direction: row;
+    column-gap: 5px;
 }
 
 .movieThumbnail{
