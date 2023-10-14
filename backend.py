@@ -837,7 +837,7 @@ def logout(userid):
 def admin_logout():
     if request.method == "GET":
         if "adminuser" in session:
-            session.pop("user")
+            session.pop("adminuser")
             return redirect("/admin/login")
         else:
             return redirect("/admin/login")
