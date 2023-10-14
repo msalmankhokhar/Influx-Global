@@ -19,6 +19,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from multiprocessing import Process
 import os
+# import waitress
 
 app = Flask(__name__)
 # run_with_ngrok(app)
@@ -1309,3 +1310,4 @@ scheduler_main.start()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
+    # waitress.serve(app, host='0.0.0.0', port=5000)

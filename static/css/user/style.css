@@ -223,6 +223,25 @@ nav{
     
 }
 
+#topBar{
+    display: flex;
+    justify-content: end;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ffffff26;
+    position: sticky;
+    top: 0px;
+    backdrop-filter: blur(54px);
+    background-color: black;
+    z-index: 1;  
+}
+
+#notificationBtn{
+
+}
+
 @media screen and (max-width: 1431px) {
     #movieCardsContainer{
         
