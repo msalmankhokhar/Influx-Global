@@ -106,6 +106,12 @@ class paymentResquests(db.Model):
     account_details = db.Column(db.String, nullable=True, unique=False)
     payment_method = db.Column(db.String, nullable=True, unique=False)
 
+class IdVerificationResquests(db.Model):
+    req_id = db.Column(db.String(50), primary_key=True)
+    fullname = db.Column(db.String, nullable=True, unique=False)
+    id_no = db.Column(db.String, nullable=True, unique=False)
+    dob = db.Column(db.String, nullable=True, unique=False)
+
 class levels(db.Model):
     level_number = db.Column(db.Integer, primary_key=True, nullable=False)
 
@@ -522,7 +528,10 @@ def verify_userIdentity():
             user_id = session["user"]
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
-                return render_template("user/verifyID.html", user=selected_user, currentPagespanText="", round=round)
+                if selected_user.account_status == "non-verified":
+                    return render_template("user/verifyID.html", user=selected_user, currentPagespanText="", round=round)
+                else:
+                    return redirect("/user/account")
             else:
                 session.pop("user")
                 return redirect("/")
@@ -543,15 +552,29 @@ def verify_userIdentity():
         front = request.files['front']
         back = request.files['back']
         files = request.files
+
+        fullname = request.form.get("fullname")
+        id_no = request.form.get("id_no")
+        dob = request.form.get("dob")
+        # dob_obj = datetime.strptime(dob, "%Y-%d-%m").date()
+
         for key in files:
             file = files[key]
             file_extention = os.path.splitext(file.filename)[1]
             filename = secure_filename(file.name + file_extention)
             file.save(os.path.join(uploads_folder_path, filename))
-        # print(request.files)
-        # return f"files saved successfully in folder {uploads_folder_path}"
+
+        # print(f"dob is {dob}")
+
+
         flash("Identity documents submitted successfully<br><br>Wait for admins to approve your account. Once your account gets verified, you can recharge credits and buy ticket. Approval may take 24 hours. In case of further delay, contact the customer support")
         selected_user.account_status = "Pending"
+        selected_req = IdVerificationResquests.query.filter_by(req_id=user_id).first()
+        if selected_req:
+            db.session.delete(selected_req)
+            db.session.commit()
+        new_idVerReq = IdVerificationResquests(req_id=user_id, fullname=fullname, id_no=id_no, dob=dob)
+        db.session.add(instance=new_idVerReq)
         db.session.commit()
         return redirect("/user/account")
 
@@ -1114,14 +1137,45 @@ def get_id_docsImg_srcList(user_id):
         imgSrcList.append("None")
         return imgSrcList
 
+def get_userIdentityData(user_id):
+    with app.app_context():
+        return IdVerificationResquests.query.filter_by(req_id=user_id).first()
+    
+def get_dobString(dob_string):
+    dob_obj = datetime.strptime(dob_string, "%Y-%m-%d").date()
+    return dob_obj.strftime("%b %d %Y")
+
 @app.route("/admin/ID-Verification", methods=["GET"])
 def id_verifications():
     if request.method == "GET":
         if "adminuser" in session:
             usersList = users.query.filter_by(account_status="Pending").all()
-            return render_template('admin/idVerification.html', usersList=usersList, round=round, currentNavlinkSpanText="ID Verification", abbrev_to_country=abbrev_to_country, get_id_docsImg_srcList=get_id_docsImg_srcList)
+            return render_template('admin/idVerification.html', usersList=usersList, round=round, currentNavlinkSpanText="ID Verification", abbrev_to_country=abbrev_to_country, get_id_docsImg_srcList=get_id_docsImg_srcList, get_userIdentityData=get_userIdentityData, get_dobString=get_dobString)
         else:
             return redirect("/admin/login")
+        
+@app.route("/admin/edit_userID_data/<string:user_id>", methods=["GET", "POST"])
+def edit_userID_data(user_id):
+    req = IdVerificationResquests.query.filter_by(req_id=user_id).first()
+    if request.method == "GET":
+        if "adminuser" in session:
+            return render_template('admin/edit_idVerification.html', currentNavlinkSpanText="", req=req)
+        else:
+            return redirect("/admin/login")
+    elif request.method == "POST":
+        fullname = request.form.get("fullname")
+        id_no = request.form.get("id_no")
+        dob = request.form.get("dob")
+
+        req.fullname = fullname
+        req.id_no = id_no
+        req.dob = dob
+        try:
+            db.session.commit()
+            flash("changes made to user Identity details were saved successfully")
+        except Exception as e:
+            flash(f"<strong>Error</strong><br>{e}")
+        return redirect("/admin/ID-Verification")
         
 @app.route("/admin/approve_user/<string:userid>", methods=["GET"])
 def admin_approveUser(userid):
@@ -1309,5 +1363,5 @@ scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0
 scheduler_main.start()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
     # waitress.serve(app, host='0.0.0.0', port=5000)

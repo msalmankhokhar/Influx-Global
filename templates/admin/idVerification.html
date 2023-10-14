@@ -12,9 +12,10 @@
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">User ID</th>
-                <th scope="col">Name</th>
+                <th scope="col">User Name</th>
                 <th scope="col">Phone</th>
                 <th scope="col">Country</th>
+                <th>ID Details</th>
                 <th scope="col">ID Proof</th>
                 <th scope="col">Actions</th>
             </tr>
@@ -23,19 +24,35 @@
             {% for user in usersList %}
             <tr>
                 <td>{{ usersList.index(user) + 1 }}</td>
-                <td>{{user.user_id}}</td>
-                <td>{{user.name}}</td>
-                <td>{{user.phone}}</td>
-                <td>{{abbrev_to_country[user.country]}}</td>
+                <td>{{ user.user_id }}</td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.phone }}</td>
+                <td>{{ abbrev_to_country[user.country] }}</td>
+                <td>
+                    <table class="table">
+                        <thead>
+                            <th>Full Name</th>
+                            <th>NIC Number</th>
+                            <th>Date Of Birth</th>
+                        </thead>
+                        <tbody>
+                            {% set reqData = get_userIdentityData(user.user_id) %}
+                            <td>{{reqData.fullname}}</td>
+                            <td>{{reqData.id_no}}</td>
+                            <td>{{get_dobString(reqData.dob)}}</td>
+                        </tbody>
+                    </table>
+                </td>
                 <td>
                     {% for imgSrc in get_id_docsImg_srcList(user.user_id) %}
-                    <a href="{{imgSrc}}"><img src="{{imgSrc}}" alt="ID Document" width="100"></a>
+                    <a href="{{ imgSrc }}"><img style="margin: 0px 0px;" src="{{ imgSrc }}" alt="ID Document" width="150"></a>
                     {% endfor %}
                 </td>
 
-                <td style="display: flex; flex-direction: column;; row-gap: 5px;">
-                    <a href="/admin/approve_user/{{ user.user_id }}" class="btn btn-success actionBtn">Approve User</a>
-                    <a href="/admin/reject_user/{{ user.user_id }}" class="btn btn-danger actionBtn">Reject User</a>
+                <td>
+                    <a style="margin: 0px 0px;" href="/admin/approve_user/{{ user.user_id }}" class="btn btn-success actionBtn">Approve User</a>
+                    <a style="margin: 0px 0px;" href="/admin/edit_userID_data/{{ user.user_id }}" class="btn btn-light actionBtn2">Edit ID details</a>
+                    <a style="margin: 0px 0px;" href="/admin/reject_user/{{ user.user_id }}" class="btn btn-danger actionBtn">Reject User</a>
                 </td>
             </tr>
             {% endfor %}

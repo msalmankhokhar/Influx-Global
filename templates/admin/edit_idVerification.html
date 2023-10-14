@@ -1,6 +1,8 @@
-{% extends 'user/home.html' %}
+{% extends 'admin/movies.html' %}
 
-{% block title %}Verify User ID{% endblock title %}
+{% block title %}Modify User ID Details{% endblock title %}
+
+{% block bs %}{% endblock bs %}
 
 {% block css %}
 <style>
@@ -13,6 +15,7 @@
         flex-direction: column;
         display: flex;
         row-gap: 3vh;
+        align-self: center;
     }
     .imageInput{
         padding: 20px;
@@ -49,30 +52,22 @@
 {% block main %}
 
 <div id="verifyUserIdentityFormContainer" class="container">
-    <h1 class="textCenter">Verify your national identity</h1>
-    <p class="textCenter">Give some some basic identity info and upload pictures of front and back side of your national identity card/document. This is crucial to build a safe environment for investors</p>
+    <h1 class="textCenter">Modify user identity details</h1>
+    <!-- <p class="textCenter">Give some some basic identity info and upload pictures of front and back side of your national identity card/document. This is crucial to build a safe environment for investors</p> -->
     <form action="" method="post" enctype="multipart/form-data" id="verifyUserIdentityForm">
         <div class="myInputFieldWrapper">
-            <label for="nameInput">Your full name as per your identity document</label>
-            <input type="text" name="fullname" id="nameInput"  class="myInputField" placeholder="" required>
+            <label for="nameInput">Full name of user</label>
+            <input type="text" name="fullname" id="nameInput"  class="myInputField" placeholder="" required value="{{req.fullname}}">
         </div>
         <div class="myInputFieldWrapper">
             <label for="idNoInput">National ID number</label>
-            <input type="text" name="id_no" id="idNoInput"  class="myInputField" placeholder="" required>
+            <input type="text" name="id_no" id="idNoInput"  class="myInputField" placeholder="" required value="{{req.id_no}}">
         </div>
         <div class="myInputFieldWrapper">
             <label for="dobInput">Date of Birth</label>
-            <input type="date" name="dob" id="dobInput"  class="myInputField" placeholder="" required>
+            <input type="date" name="dob" id="dobInput"  class="myInputField" placeholder="" required value="{{req.dob}}">
         </div>
-        <div class="inputContainer">
-            <label for="frontInput">Front Side of ID Card/document</label>
-            <input type="file" name="front" id="" class="imageInput" required placeholder="front" id="frontInput" accept="image/png, image/jpeg">
-        </div>
-        <div class="inputContainer">
-            <label for="backInput">Back Side of ID Card/document</label>
-            <input type="file" name="back" id="" class="imageInput" required placeholder="back" id="backInput" accept="image/png, image/jpeg">
-        </div>
-        <button class="btn btnNormal" type="submit">Submit</button>
+        <button class="btn btnNormal" type="submit">Save</button>
     </form>
 </div>
 

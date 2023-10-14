@@ -224,11 +224,13 @@ timezone = pytz.timezone(timezone_dict['TH'][0])
 
 # percentage calculation:
 
-tickets_purchased = 13
-price_per_ticket = 3
-profit_percentage = 2.5
-total_prrchase_value = price_per_ticket * tickets_purchased
-print(f"total purchase value is {total_prrchase_value}")
-print(f"percentage in decimal is {profit_percentage/100}")
-estimated_daily_profit = total_prrchase_value * (profit_percentage/100)
-print(f"estimated dailty profit is {estimated_daily_profit}")
+# tickets_purchased = 13
+# price_per_ticket = 3
+# profit_percentage = 2.5
+# total_prrchase_value = price_per_ticket * tickets_purchased
+# print(f"total purchase value is {total_prrchase_value}")
+# print(f"percentage in decimal is {profit_percentage/100}")
+# estimated_daily_profit = total_prrchase_value * (profit_percentage/100)
+# print(f"estimated dailty profit is {estimated_daily_profit}")
+
+print(datetime.strptime("2023-14-09", "%Y-%d-%m").date())
