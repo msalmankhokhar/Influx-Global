@@ -317,7 +317,7 @@ def return_daily_profit(user_id, data):
                 invitor_primary.overall_earning += primary_profit
                 print(f'Returned {primary_profit} dollars in wallet of {invitor_primary.name} as daily referal profit')
 
-            if invitor_secondary:
+            if invitor_secondary and invitor_primary:
                 secondary_profit = estimated_daily_profit * 0.05
                 invitor_secondary.wallet_balance += secondary_profit
                 invitor_secondary.today_earning += secondary_profit
