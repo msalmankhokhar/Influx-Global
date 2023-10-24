@@ -19,7 +19,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from multiprocessing import Process
 import os
-# import waitress
+import waitress
 
 app = Flask(__name__)
 # run_with_ngrok(app)
@@ -335,7 +335,11 @@ def buy_ticket():
         selected_user = users.query.filter_by(user_id=session['user']).first()
 
         if selected_user.account_status != "Verified":
-            flash("You need to verify your identity before you recharge credits and buy tickets<br><br>Upload your National ID card pictures here. Admins will review and approve your account. Once your account gets approved, you can recharge and start buying tickets")
+            if selected_user.account_status == "Pending":
+                flash("You identity verification process is still pending. Wait for admins to approve your account. Once your account gets approved, you can buy tickets & recharge your wallet")
+            else:
+                flash("You need to verify your identity before you recharge credits and buy tickets<br><br>Upload your National ID card pictures here. Admins will review and approve your account. Once your account gets approved, you can recharge and start buying tickets")
+
             return redirect("/verify-user-identity")
         
         movie_id = request.args.get("movie_id")
