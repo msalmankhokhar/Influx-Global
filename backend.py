@@ -297,10 +297,9 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
 def return_daily_profit(user_id, data):
     with app.app_context():
         selected_user = users.query.filter_by(user_id=user_id).first()
-        invitor_primary = users.query.filter_by(selfReferalCode = selected_user.joiningReferalCode).first()
-        invitor_secondary = users.query.filter_by(selfReferalCode = invitor_primary.joiningReferalCode).first()
         if selected_user:
             print("went in if (return daily profit)")
+            invitor_primary = users.query.filter_by(selfReferalCode = selected_user.joiningReferalCode).first()
             estimated_daily_profit = data['estimated_daily_profit']
 
             selected_user.wallet_balance += estimated_daily_profit
@@ -310,6 +309,7 @@ def return_daily_profit(user_id, data):
             print(f'Returned {estimated_daily_profit} dollars in wallet of {selected_user.name} as daily profit')
 
             if invitor_primary:
+                invitor_secondary = users.query.filter_by(selfReferalCode = invitor_primary.joiningReferalCode).first()
                 primary_profit = estimated_daily_profit * 0.1
                 invitor_primary.wallet_balance += primary_profit
                 invitor_primary.today_earning += primary_profit
@@ -317,13 +317,13 @@ def return_daily_profit(user_id, data):
                 invitor_primary.overall_earning += primary_profit
                 print(f'Returned {primary_profit} dollars in wallet of {invitor_primary.name} as daily referal profit')
 
-            if invitor_secondary and invitor_primary:
-                secondary_profit = estimated_daily_profit * 0.05
-                invitor_secondary.wallet_balance += secondary_profit
-                invitor_secondary.today_earning += secondary_profit
-                invitor_secondary.monthly_earning += secondary_profit
-                invitor_secondary.overall_earning += secondary_profit
-                print(f'Returned {secondary_profit} dollars in wallet of {invitor_secondary.name} as daily referal profit')
+                if invitor_secondary:
+                    secondary_profit = estimated_daily_profit * 0.05
+                    invitor_secondary.wallet_balance += secondary_profit
+                    invitor_secondary.today_earning += secondary_profit
+                    invitor_secondary.monthly_earning += secondary_profit
+                    invitor_secondary.overall_earning += secondary_profit
+                    print(f'Returned {secondary_profit} dollars in wallet of {invitor_secondary.name} as daily referal profit')
 
             db.session.commit()
         else:
