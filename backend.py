@@ -959,9 +959,11 @@ def generate_referalLink(referalCode, websiteName='influxglobal.com'):
     return f'http://{websiteName}/register?referalCode={referalCode}'
 
 def destroy_experience_money(user_id):
-    selected_user = users.query.get(user_id)
-    selected_user.experience_money = None
-    db.session.commit()
+    with app.app_context():
+        # selected_user = users.query.get(user_id)
+        selected_user = users.query.filter_by(user_id=user_id).first()
+        selected_user.experience_money = None
+        db.session.commit()
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
