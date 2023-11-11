@@ -18,11 +18,41 @@
 
 <body>
 
-    <!-- <div id="topBar">
-        <span id="notificationBtn" class="btnWithIcon">
-            <i class="fa-regular fa-bell"></i>
-        </span>
-    </div> -->
+    <div id="topBar">
+        <div class="block" style="padding: 5px 10px;">
+            <span class="btnWithIcon">
+                <img src="/static/img/favicons/apple-touch-icon.png" alt="logo" class="topBarLogo">
+                <span style="font-weight: bold;">Influx Global</span>
+            </span>
+        </div>
+        <div class="block" style="font-size: 0.8rem; cursor: pointer;">
+            <span class="btnWithIcon topBarSpan" id="profileSpan">
+                <div class="dpImgWrapper">
+                    {% if get_dpImg_src(user.user_id) %}
+                    <img class="dpImg" src="{{get_dpImg_src(user.user_id)}}" alt="DP">
+                    {% else %}
+                    <i class="fa-solid fa-user" style="color: #ffffff;"></i>
+                    {% endif %}
+                </div>
+                <span>{{user.name}}</span>
+                <i class="fa-solid fa-caret-down"></i>
+            </span>
+
+            <!-- <span id="notificationBtn" class="btnWithIcon">
+                <i class="fa-regular fa-bell"></i>
+            </span> -->
+        </div>
+    </div>
+
+    <div id="menuContainer">
+        <a class="menuLink" href="/user-home">Home</a>
+        <a class="menuLink" href="/user">App</a>
+        <a class="menuLink" href="/user/account">Account</a>
+        <a class="menuLink" href="/user/wallet">Wallet</a>
+        <a class="menuLink" href="/user/account_settings">Settings</a>
+        <a class="menuLink" href="/user/help">Help</a>
+        <a class="menuLink" href="/logout/{{user.user_id}}">Log Out</a>
+    </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -138,6 +168,8 @@
 <script>
     let navlinkSpanList = document.querySelectorAll(".navlink.navlinkWithIcon span");
     let categoryLinkList = document.querySelectorAll(".movieCategoryBtn");
+    let menuContainer = document.getElementById("menuContainer");
+    let profileSpan = document.getElementById("profileSpan");
     function setCurrentNavlink(){
         console.log("onload function runing");
         navlinkSpanList.forEach(span => {
@@ -151,6 +183,10 @@
             }
         })
     }
+
+    profileSpan.addEventListener("click", (e)=>{
+        menuContainer.classList.toggle("open")
+    })
 
     document.body.onload = setCurrentNavlink;
 </script>

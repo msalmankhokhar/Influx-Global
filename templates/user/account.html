@@ -69,11 +69,40 @@
         justify-content: center;
         width: 10vw;
         height: 10vw;
+        overflow: hidden;
+        position: relative;
     }
 
-    .profilePicWrapper span {
+    .profilePicWrapper i.fa-camera{
+        position: absolute;
+        transition: 0.5s;
+        cursor: pointer;
+        opacity: 0;
+    }
+    
+    .dpImg{
+        transition: 0.5s;
+        width: 112%;
+    }
+
+    .profilePicWrapper:hover .dpImg{
+        opacity: 0.5;
+    }
+    .profilePicWrapper:hover i.fa-camera{
+        opacity: 1;
+    }
+
+    .profilePicWrapper i.fa-user, .profilePicWrapper i {
         font-weight: bold;
         font-size: 3rem;
+    }
+
+    .profilePicWrapper:hover i.fa-user{
+        display: none;
+    }
+
+    .profilePicWrapper:hover i{
+        display: inline;
     }
 
     span.name{
@@ -175,15 +204,15 @@
         font-size: 1.2rem;
         font-weight: bold;
     }
-    span.btnWithIcon{
+    .btnWithIcon.verStatus{
         background-color: white;
         padding: 8px 13px;
         border-radius: 30px;
     }
-    span.btnWithIcon i{
+    .btnWithIcon.verStatus i{
         line-height: 0px;
     }
-    span.btnWithIcon span{
+    .btnWithIcon.verStatus span{
         font-weight: bold;
         font-size: 0.9rem;
     }
@@ -243,7 +272,7 @@
 
     <div id="verificationBox" class="v-box-{{user.account_status}}">
         <span class="title">Verification Status</span>
-        <span class="btnWithIcon">
+        <span class="btnWithIcon verStatus">
             {% if user.account_status == 'non-verified' %}
             <i class="fa-solid fa-triangle-exclamation"></i>
             {% elif user.account_status == 'Pending' %}
@@ -262,8 +291,17 @@
     <div id="profileContainer">
         <div class="profileSection">
             <span class="userId infoBlock">User Id {{user.user_id}}</span>
-            <div class="profilePicWrapper">
-                <span>{{ user.name[0] }}</span>
+            <div class="profilePicWrapper" id="profilePicWrapper">
+                <!-- <span>{{ user.name[0] }}</span> -->
+                <!-- <i class="fa-solid fa-user" style="color: #adadad;"></i> -->
+
+                {% if get_dpImg_src(user.user_id) %}
+                <img class="dpImg" src="{{get_dpImg_src(user.user_id)}}" alt="DP">
+                <i class="fa-solid fa-camera"></i>
+                {% else %}
+                <i class="fa-solid fa-user" style="color: #ffffff;"></i>
+                <i class="fa-solid fa-camera"></i>
+                {% endif %}
             </div>
             <span class="name">{{user.name}}</span>
         </div>
@@ -276,6 +314,11 @@
         </div>
         
     </div>
+    <a href="/user/account_settings" class="btn btnNormal btnWithIcon">
+        <i class="fa-solid fa-gear"></i>
+        <span>Account Settings</span>
+        <i class="fa-solid fa-arrow-right"></i>
+    </a>
     <div class="referalCodeWrapper levelSection">
         <span class="amountBlock">
             Referal Code <div class="rCode">{{user.selfReferalCode}}</div>
@@ -303,6 +346,10 @@
 
 </div>
 
+<form id="dpForm" action="/upload_dp" method="post" style="display: none;" enctype="multipart/form-data">
+    <input type="file" name="dp" id="dpInput" accept="image/png, image/jpg, image/jpeg">
+</form>
+
 {% endblock main %}
 
 {% block js %}
@@ -310,6 +357,17 @@
     let refLinKCopyBtn = document.getElementById("refLinKCopyBtn");
     let refLinKCopyBtnSpan = document.getElementById("refLinKCopyBtnSpan");
     let referalLink = "https://www.influx-global.com/register?referalCode={{user.selfReferalCode}}"
+    let profilePicWrapper = document.getElementById("profilePicWrapper")
+    let dpInput = document.getElementById("dpInput")
+    let dpForm = document.getElementById("dpForm")
+
+    dpInput.addEventListener("change", (e)=>{
+        dpForm.submit()
+    })
+
+    profilePicWrapper.addEventListener("click", (e)=>{
+        dpInput.click();
+    })
 
     refLinKCopyBtn.addEventListener('click', (e)=>{
         navigator.clipboard.writeText(referalLink).then(()=>{

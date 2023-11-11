@@ -1,0 +1,172 @@
+{% extends 'user/home.html' %}
+
+{% block title %}user-home{% endblock title %}
+
+{% block css %}
+<style>
+#introContainer{
+    background-color: #00008b45;
+    min-height: 80vh;
+    /* background-image: url("/static/img/logos/Influx global logo Landscape Final Files/Jpeg/Influx global logo Landscape Final Files-05.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-blend-mode: darken;
+    background-color: rgba(0, 0, 0, 0.484); */
+}
+#introContainer h1{
+    margin: 3vh 0px;
+    font-size: 2.5rem;
+}
+#introContainer h1 .hello{
+    /* font-size: 2rem; */
+}
+#introContainer h1 .name{
+    /* font-style: italic; */
+    font-size: 2rem;
+}
+#introContainer h1 .two{
+    font-size: 2rem;
+}
+.mainSection{
+    padding: 10vh 10vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 5vh;
+}
+.mainSection .blockCol{
+    display: flex;
+    flex-direction: column;
+    row-gap: 3vh;
+    align-self: normal;
+}
+.mainSection .blockRow{
+    display: flex;
+    justify-content: space-evenly;
+    align-self: normal;
+    align-items: center;
+    row-gap: 3vh;
+    flex-wrap: wrap;
+    row-gap: 35px;
+    column-gap: 70px;
+}
+.mainSection .block .h{
+
+}
+.mainSection .block .content{
+}
+.siteMockup{
+    /* max-width: 35%; */
+    max-width: 329px;
+    box-shadow: 1px 1px 8px black;
+    border-radius: 90px 0px;
+}
+ol.content.getStarted{
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+}
+.faq{
+    /* background-color: #df7900; */
+    background-color: #aeaeae69;
+    box-shadow: 3px 3px 10px black;
+    border-radius: 9px;
+}
+.faq summary{
+    padding: 20px;
+}
+.faq p{
+    padding: 20px;
+    /* margin-top: 20px; */
+    color: black;
+    background-color: white;
+}
+
+@media screen and (max-width: 641px){
+    .mainSection{
+        padding: 10vh 5vh;
+    }
+    #introContainer h1{
+        text-align: center;
+    }
+    #introContainer h1 .two{
+        font-size: 56%;
+    }
+    #introContainer h1 .hello{
+        font-size: 65%;
+    }
+    #introContainer h1 .name{
+        font-size: 56%;
+    }
+    .blockCol .h{
+        font-size: 1.4rem;
+    }
+    #faqsContainer h1{
+        text-align: center;
+        font-size: 1.2rem;
+    }
+    .siteMockup{
+        max-width: 90%;
+        border-radius: 46px 0px;
+    }
+    .faq{
+        font-size: 0.9rem;
+        border-radius: 9px;
+    }
+    .faq p, .faq summary{
+        padding: 13px;
+    }
+}
+</style>
+{% endblock css %}
+
+{% block nav %}{% endblock nav %}
+
+{% block main %}
+<div id="introContainer" class="mainSection">
+    <h1 class="textCenter">
+        <span class="hello">Hello</span>, 
+        <span class="name">{{user.name}}</span>
+        <br>
+        <span class="two">Thanks for joining us</span>       
+    </h1>
+    <div class="blockRow">
+        <div class="blockCol">
+            <h2 class="h">Get started on Influx Global</h2>
+            <div class="content getStarted">
+                <p>Go to our App</p>
+                <p>Verify your account by providing your identity details</p>
+                <p>Recharge your wallet</p>
+                <p>Start buying movie tickets</p>
+                <p>Get back your profits</p>
+            </div>
+            <a href="/user" target="_blank" class="btn btnNormal btnWithIcon">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>Go to App</span>
+            </a>
+        </div>
+        <img src="/static/img/smartmockups_loshmh0g.jpg" alt="mockup" class="siteMockup">
+    </div>
+</div>
+
+<div id="faqsContainer" class="mainSection">
+    <h1>Frequently Asked Questions (FAQs)</h1>
+    <div class="faqsWrapper blockCol">
+        <details class="faq" open>
+            <summary>What is Influx Global?</summary>
+            <p>Influx Global is a company affiliated with American Zoetrope. It has a website where users can register themselves, invest there money with us in supporting the hollywood movie industry, through pre sales and post sales. Users get there profits on regular basis.</p>
+        </details>
+        <details class="faq" open>
+            <summary>Influx Global is availabe in which regions?</summary>
+            <p>Currently, we are operating in Thialand, Philiphines & Bangladesh. Users from these countries can register themselves on the website.</p>
+        </details>
+        <details class="faq" open>
+            <summary>How can I earn money via Influx Global investment program?</summary>
+            <p>You can create an account on our website, and start buying movie tickets. After a specific duration, you will get your capital investment plus earned profits.</p>
+        </details>
+    </div>
+</div>
+{% endblock main %}
+
+{% block js %}{% endblock js %}

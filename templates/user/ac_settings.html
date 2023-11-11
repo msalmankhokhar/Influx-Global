@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}Account settings - User{% endblock title %}
+
+{% block desc %}Change your account settings{% endblock desc %}
+
+{% block css %}
+
+<style>
+
+main{
+    height: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 5vw;
+}
+
+.left{
+    /* width: 50%; */
+    display: inherit;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.left img{
+    width: 35vw;
+}
+
+.right{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* width: 50%; */
+    row-gap: 5vh;
+}
+
+.right h1{
+    font-size: 2.4rem;
+}
+
+form label{
+    color: black;
+    font-weight: bold;
+}
+
+.right{
+    padding: 10vh 0px;
+}
+
+.inputField{
+    /* width: auto; */
+}
+
+main{
+    height: auto;
+}
+
+.dpFieldWrapper{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.dpFieldWrapper .dpWrapper{
+    border-radius: 100%;
+    background-color: black;
+    padding: 5px;
+    overflow: hidden;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.dpFieldWrapper img{
+    width: 112%;
+}
+.dpFieldWrapper i.fa-user{
+    font-size: 3rem;
+}
+.dpFieldWrapper .btnsDiv{
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+}
+
+</style>
+
+{% endblock css %}
+
+{% block nav %}{% endblock nav %}
+
+{% block header %}{% endblock header %}
+
+{% block main %}
+
+<main>
+    <section class="right">
+    <h1 class="textCenter">Change your account settings</h1>
+    <form id="dpForm" action="/upload_dp" method="post" style="display: none;" enctype="multipart/form-data">
+        <input type="file" name="dp" id="dpinput" accept="image/png, image/jpg, image/jpeg">
+    </form>
+    <form action="" method="post" id="loginForm">
+        <div class="dpFieldWrapper">
+                <div class="dpWrapper" id="dpWrapper">
+                    {% if get_dpImg_src(user.user_id) %}
+                    <img src="{{get_dpImg_src(user.user_id)}}" alt="Profile picture">
+                    {% else %}
+                    <i class="fa-solid fa-user"></i>
+                    {% endif %}
+                </div>
+                <div class="btnsDiv" id="dpBtnsDiv">
+                    {% if get_dpImg_src(user.user_id) %}
+                    <button type="button" class="btn btnNormal btnWithIcon" id="dpUploadBtn">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Change picture</span>                       
+                    </button>
+                    <button type="button" class="btn btnRed btnWithIcon" id="dpDelBtn">
+                        <i class="fa-solid fa-trash"></i>
+                        <span>Delete picture</span>                       
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btnNormal btnWithIcon" id="dpUploadBtn">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Set profile picture</span>                       
+                    </button>
+                    <button type="button" class="btn btnRed btnWithIcon" id="dpDelBtn" style="display: none;">
+                        <i class="fa-solid fa-trash"></i>
+                        <span>Delete picture</span>                       
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <label for="nameInput">Your Name</label>
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-user"></i>
+                <input class="inputField inputFieldJs" type="text" placeholder="Your Name" required name="name" id="nameInput" value="{{user.name}}">
+            </div>
+
+            <div class="formInfo danger">               
+                <p><span><i class="fa-solid fa-circle-info"></i></span> The phone number should me in international format(including country code)</p>
+            </div>
+            <label for="phoneInput">Your Phone number</label>
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-phone"></i>
+                <input class="inputField inputFieldJs" type="tel" placeholder="Phone Number" required name="phone" id="phoneInput" value="{{user.phone}}">
+            </div>
+
+            <div class="formInfo">               
+                <p><span><i class="fa-solid fa-circle-info"></i></span> Adding an email address to your account in recommended. This email will be used to to send account notifications about your orders, recharge and withdraw. Also it will be used to reset the password in case you forget your password</p>
+            </div>
+            <label for="phoneInput">Email (optional but recommended)</label>
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-phone"></i>
+                {% if user.email == "" or user.email == None or user.email == "None" %}
+                <input class="inputField inputFieldJs" type="email" placeholder="Email address" name="email" id="emailInput">
+                {% else %}
+                <input class="inputField inputFieldJs" type="email" placeholder="Email address" name="email" id="emailInput" value="{{user.email}}">
+                {% endif %}
+            </div>
+            <label for="phoneInput">Password</label>
+            <div class="inputFieldWrapper">
+                <i class="fa-solid fa-lock"></i>
+                <input class="inputField inputFieldJs" type="password" placeholder="Password" name="password" id="pInput" value="{{user.password}}">
+                <i class="fa-solid fa-eye" id="pShowBtn"></i>
+            </div>
+
+            <button type="submit" class="btn btnNormal" id="submitBtn">Save changes</button>
+            <a href="/user/account" class="btn btnTrans black">Cancel</a>
+        </form>
+    </section>
+</main>
+
+{% endblock main %}
+
+{% block footer %}{% endblock footer %}
+
+{% block js %}
+
+<script>
+
+let dpUploadBtn =  document.getElementById("dpUploadBtn");
+let dpInput = document.getElementById("dpinput");
+let dpWrapper = document.getElementById("dpWrapper");
+let dpBtnsDiv = document.getElementById("dpBtnsDiv");
+let dpDelBtn = document.getElementById("dpDelBtn");
+
+let pInput = document.getElementById("pInput");
+let pShowBtn = document.getElementById("pShowBtn");
+pShowBtn.addEventListener("click", (e)=>{
+    if (pInput.type == "password"){
+        pShowBtn.classList.replace("fa-eye", "fa-eye-slash")
+        pInput.type = "text"
+    }else{
+        pShowBtn.classList.replace("fa-eye-slash", "fa-eye")
+        pInput.type = "password"
+    }
+})
+
+dpDelBtn.addEventListener("click", async function(e){
+    
+    await fetch('/delete_dp/{{user.user_id}}', {
+        method: "GET"
+    }).then((response)=>{
+        return response.json()
+    }).then((responseJson)=>{
+        if (!responseJson["error"]){
+            dpWrapper.innerHTML = `<i class="fa-solid fa-user"></i>`;
+            dpDelBtn.style.display = "none";
+            dpUploadBtn.lastElementChild.innerHTML = "Set profile picture";
+        }
+        else{
+            window.alert(responseJson["errorText"])
+        }
+    })
+})
+
+dpUploadBtn.addEventListener("click", (e)=>{
+    // e.preventDefault();
+    dpInput.click();
+})
+
+dpInput.addEventListener("change", (async function(e){
+    let formObj = new FormData();
+    let dpFile = dpInput.files[0];
+    formObj.append("dp", dpFile);
+    formObj.append("source", "js");
+    await fetch('/upload_dp', {
+        method:"POST",
+        body:formObj
+    }).then((response) => {
+        return response.json();
+    }).then(async function(responseJson){
+        console.log(`Error is ${responseJson['error']}`);
+        console.log(`ErrorText is ${responseJson['errorText']}`);
+        window.alert(responseJson['errorText']);
+        if(!responseJson['error']){
+            await fetch('/get-dp-img-src/{{user.user_id}}', {
+                method:"GET"
+            }).then((response)=>{
+                return response.text()
+            }).then((responseText)=>{
+                dpWrapper.innerHTML = `<img src="${responseText}" alt="Profile picture">`;
+                dpUploadBtn.lastElementChild.innerHTML = "Change Picture";
+                dpDelBtn.style.display = "flex"
+            })
+        }
+    })
+}))
+
+
+
+</script>
+
+{% endblock js %}

@@ -12,20 +12,25 @@
         row-gap: 5vh;
     }
 
-    .btnWithIcon{
+    /* .btnWithIcon.socialIcon{
         justify-content: normal;
         font-size: 3rem;
     }
-    .btnWithIcon span{
+    .btnWithIcon.socialIcon span{
         width: 100%;
-    }
+    } */
+
     .helpBtn{
         text-decoration: none;
         display: flex;
         /* align-items: center; */
-        font-size: 3rem;
+        font-size: 1.5rem;
         border: none;
         border-radius: 70px;
+        transition: 0.3s;
+    }
+    .helpBtn:hover{
+        transform: translateX(15px);
     }
     .helpBtn span{
         width: 100%;
@@ -46,7 +51,11 @@
         border-radius: inherit;
     }
     .helpBtn span,.helpBtn i{
-        padding: 4%;
+        /* padding: 2%; */
+        padding: 20px;
+    }
+    h1{
+        font-size: 143%;
     }
 
 </style>

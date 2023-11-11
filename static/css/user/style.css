@@ -225,21 +225,79 @@ nav{
 
 #topBar{
     display: flex;
-    justify-content: end;
-    padding-left: 15px;
+    justify-content: space-between;
+    align-items: center;
+    /* padding-left: 15px;
     padding-right: 15px;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding-top: 8px;
+    padding-bottom: 8px; */
     border-bottom: 1px solid #ffffff26;
     position: sticky;
     top: 0px;
     backdrop-filter: blur(54px);
-    background-color: black;
-    z-index: 1;  
+    background-color: #2e2e2e;
+    z-index: 1;
+    padding: 10px;
+}
+
+#topBar .block{
+
+}
+
+#topBar .dpImg{
+    width: 34px;
+    border-radius: 100%;
+}
+
+.topBarLogo {
+    width: 40px;
+    border-radius: 87%;
+}
+
+/* span.btnWithIcon.topBarSpan{
+    background: none;
+} */
+
+#profileSpan{
+    padding: 5px 10px;
+}
+
+#profileSpan:hover{
+    background-color: #1d1d1d;
 }
 
 #notificationBtn{
 
+}
+
+#menuContainer{
+    transition: 0.3s;
+    opacity: 0;
+    display: none;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8rem;
+    background-color: black;
+    background-color: #bd6903;
+    max-width: fit-content;
+    position: fixed;
+    right: 9px;
+    /* border: 1px solid #ffffff8f; */
+    border-radius: 5px;
+    z-index: 1;
+}
+#menuContainer.open{
+    display: flex;
+    opacity: 1;
+}
+.menuLink{
+    padding: 13px 54px;
+    text-decoration: none;
+    color: white;
+}
+.menuLink:hover{
+    background-color: black;
 }
 
 @media screen and (max-width: 1431px) {

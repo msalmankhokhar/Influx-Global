@@ -20,6 +20,7 @@ from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from multiprocessing import Process
 import os
 import waitress
+import shutil
 
 app = Flask(__name__)
 # run_with_ngrok(app)
@@ -73,6 +74,7 @@ scheduler_main = BackgroundScheduler(config_for_main_scheduler)
 class users(db.Model):
     user_id = db.Column(db.String(50), primary_key=True, nullable=False)
     name = db.Column(db.String(50), nullable=False, unique=False)
+    email = db.Column(db.String, nullable=True, unique=False)
     phone = db.Column(db.String(50), nullable=False, unique=True)
     password = db.Column(db.String(50), nullable=False, unique=False)
     country = db.Column(db.String(20), nullable=False, unique=False)
@@ -209,9 +211,21 @@ def home():
         app_restarted = False
     if request.method == "GET":
         if "user" in session:
-            return redirect("/user")
+            # return redirect("/user")
+            return redirect("/user-home")
         else:
             return render_template("home.html")
+
+@app.route("/user-home", methods=["GET"])
+def userhome():
+    if "user" in session:
+        user = users.query.filter_by(user_id=session["user"]).first()
+        if user:
+            return render_template("user/userhome.html", user=user, get_dpImg_src=get_dpImg_src)
+        else:
+            return redirect("/")
+    else:
+        return redirect("/")
 
 @app.route("/user", methods=["GET"])
 def user():
@@ -239,7 +253,7 @@ def user():
                 print(f"sceduler bg running status is {scheduler_bg.running}")
                 if selected_user.account_status == 'non-verified':
                     flash('Your account is not verified yet<br><br>After verification of your national ID, you will be able to recharge and purchare tickets', "idVerifyWarning")
-                return render_template("user/home.html", moviesList=moviesList, user=selected_user, priceDict=priceDict, randint=randint, purchasedMoviesList=purchasedMoviesList, currentPagespanText="Home", currentMCategoryspanText=currentMCategoryspanText)
+                return render_template("user/home.html", moviesList=moviesList, user=selected_user, priceDict=priceDict, randint=randint, purchasedMoviesList=purchasedMoviesList, currentPagespanText="Home", currentMCategoryspanText=currentMCategoryspanText, get_dpImg_src=get_dpImg_src)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -439,7 +453,7 @@ def movie_quantity():
             daily_profit_percent = request.args.get("daily_profit_percent")
             movie = get_movie_details_from_ID(movie_id=movie_id)
             userLevel = levels.query.get(user.level)
-            return render_template("user/quantity.html", ticket_price=ticket_price, movie=movie, user=user, daily_profit_percent=daily_profit_percent, userLevel=userLevel, round=round)
+            return render_template("user/quantity.html", ticket_price=ticket_price, movie=movie, user=user, daily_profit_percent=daily_profit_percent, userLevel=userLevel, round=round, get_dpImg_src=get_dpImg_src)
             # return movie
         else:
             return redirect("/")
@@ -449,9 +463,151 @@ def help():
     if request.method == "GET":
         if "user" in session:
             user = users.query.filter_by(user_id=session["user"]).first()
-            return render_template("user/help.html", user=user)
+            return render_template("user/help.html", user=user, get_dpImg_src=get_dpImg_src)
         else:
             return redirect("/")
+        
+@app.route("/upload_dp", methods=["POST"])
+def upload_dp():
+    source = request.form.get("source")
+    response = {}
+    if "user" in session:
+        print("user is in session")
+        try:
+            print("went in try")
+            user = users.query.filter_by(user_id=session["user"]).first()
+            dpFile = request.files['dp']
+            dp_directory = os.path.join(app.config['UPLOAD_FOLDER'], "dp")
+            save_directory = os.path.join(dp_directory, user.user_id)
+            file_extention = os.path.splitext(dpFile.filename)[1]
+            allowed_extentions = [".jpg", ".png", ".jpeg"]
+            if file_extention in allowed_extentions:
+                print("file ext is allowd")
+                dpFile.name = "dp"
+                filename = secure_filename(dpFile.name + file_extention)
+                if not os.path.exists(save_directory):
+                    os.mkdir(save_directory)
+                else:
+                    for file in os.listdir(save_directory):
+                        os.remove(os.path.join(save_directory, file))
+                print("saving file")
+                dpFile.save(os.path.join(save_directory, filename))
+                print("Saved file")
+                # dpFile.save(os.path.join(save_directory, secure_filename(dpFile.filename)))
+                flash("Profile picture uploaded successfully")
+                if source == "js":
+                    response["error"] = False
+                    response["errorText"] = "Profile picture uploaded successfully"
+                    return response
+                else:
+                    return redirect("/user/account")
+            else:
+                print("file ext is not allowed")
+                flash("Invalid file !<br><br>Only file types of PNG, JPG or JPEG are supported")
+                if source == "js":
+                    response["error"] = True
+                    response["errorText"] = "unsupported file type"
+                    return response
+                else:
+                    return redirect("/user/account")
+        except Exception as e:
+            print("exception occured")
+            response["error": True]
+            response["errorText": e]
+            return response
+    else:
+        print("user is not in session")
+        if source == "js":
+            response["error"] = True
+            response["errorText"] = "user not in session"
+            return response
+        else:
+            return redirect("/")
+
+def validate_emailAddress(emailAddress):
+    response = requests.get(f"https://emailvalidation.abstractapi.com/v1/?api_key=e3137e717994425aa4f1c1b8d01667f0&email={emailAddress}")
+    if response.json()["is_smtp_valid"]["value"] and response.json()["is_valid_format"]["value"]:
+        return True
+    else:
+        return False
+
+@app.route("/user/account_settings", methods=["GET", "POST"])
+def user_ac_settings():
+    if "user" in session:
+        user = users.query.filter_by(user_id=session["user"]).first()
+        if request.method == "GET":
+            return render_template("user/ac_settings.html", user=user, get_dpImg_src=get_dpImg_src)
+        elif request.method == "POST":
+            name = request.form.get("name")
+            password = request.form.get("password")
+            givenEmail = request.form.get("email")
+
+            user.name = name
+            user.password = password
+
+            # validating phone number
+            givenPhone = request.form.get('phone')
+            if givenPhone[0] == "+":
+                givenPhoneWithoutPlus = givenPhone[1:]
+            else:
+                givenPhoneWithoutPlus = givenPhone
+            if user.phone != givenPhoneWithoutPlus:
+                country = user.country
+                parsedPhoneNumber = parse(givenPhone, region=country)
+                expected_countryCode = country_code_for_region(country)
+                if is_valid_number(parsedPhoneNumber) and is_possible_number(parsedPhoneNumber):
+                    phone = str(parsedPhoneNumber.country_code) + str(parsedPhoneNumber.national_number)
+                    if parsedPhoneNumber.country_code == expected_countryCode:
+                        response = requests.get(f"https://phonevalidation.abstractapi.com/v1/?api_key=fe66a964c6b24f49aa0502d30d550d0d&phone={phone}")
+                        if response.json()["valid"]:
+                            user.phone = phone
+                        else:
+                            flash("Phone number is invalid. Please provide a valid, existing phone number, in international format (included with country code)")
+                            return redirect(request.url)
+                    else:
+                        flash("Phone number is invalid. Please provide a valid, existing phone number, in international format (included with country code)")
+                        return redirect(request.url)
+                else:
+                    flash("Phone number is invalid. Please provide a valid, existing phone number, in international format (included with country code)")
+                    return redirect(request.url)
+            # Phone number validated
+
+            # validating email address
+            if user.email != givenEmail:
+                if validate_emailAddress(givenEmail):
+                    user.email = givenEmail
+                else:
+                    flash("The email you entered does not exists or is Invalid. Please enter an existing and valid email address")
+                    return redirect(request.url)
+
+            db.session.commit()
+            flash("Your Account settings saved successfully")
+            return redirect("/user/account")
+    else:
+        return redirect("/")
+
+@app.route("/get-dp-img-src/<string:user_id>", methods=["GET"])
+def get_dpImg_src(user_id):
+    user_dp_folder = os.path.join(app.config['UPLOAD_FOLDER'], "dp", user_id)
+    if os.path.exists(user_dp_folder):
+        dp_filename = os.listdir(user_dp_folder)[0]
+        img_src = "/" + os.path.join(user_dp_folder, dp_filename)
+        return img_src
+    else:
+        return False
+    
+@app.route("/delete_dp/<string:user_id>", methods=["GET"])
+def delete_dpImg(user_id):
+    try:
+        user_dp_folder = os.path.join(app.config['UPLOAD_FOLDER'], "dp", user_id)
+        if os.path.exists(user_dp_folder):
+            shutil.rmtree(user_dp_folder)
+            return {"error":False}
+        else:
+            return {"error":False}
+    except Exception as e:
+        print(str(e))
+        return {"error":True, "errorText":str(e)}
 
 @app.route("/user/account", methods=["GET"])
 def user_account():
@@ -461,7 +617,7 @@ def user_account():
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
                 level_upgrade_string = generate_level_upgrade_string(selected_user.level, selected_user.overall_referals)
-                return render_template("user/account.html", user=selected_user, level_upgrade_string=level_upgrade_string, currentPagespanText="Account", round=round)
+                return render_template("user/account.html", user=selected_user, level_upgrade_string=level_upgrade_string, currentPagespanText="Account", round=round, get_dpImg_src=get_dpImg_src)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -504,7 +660,7 @@ def user_orders():
     "weekly": {"price":5, "profit":user_level.weekly_ticket_profit, "duration": "1 week (7 days)", "duration_days":7},
     "pre sale": {"price":5, "profit":user_level.presale_ticket_profit, "duration": "Till movie release date", "duration_days":30}
     }
-                return render_template("user/orders.html", user=selected_user, moviesList=moviesListFiltered, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders", round=round)
+                return render_template("user/orders.html", user=selected_user, moviesList=moviesListFiltered, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders", round=round, get_dpImg_src=get_dpImg_src)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -518,7 +674,7 @@ def user_wallet():
             user_id = session["user"]
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
-                return render_template("user/wallet.html", user=selected_user, currentPagespanText="Wallet", round=round)
+                return render_template("user/wallet.html", user=selected_user, currentPagespanText="Wallet", round=round, get_dpImg_src=get_dpImg_src)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -623,7 +779,7 @@ def user_withdraw():
     if request.method == "GET":
         if "user" in session:
             if selected_user:
-                return render_template("user/withdraw.html", user = selected_user, float_to_int=float_to_int)
+                return render_template("user/withdraw.html", user = selected_user, float_to_int=float_to_int, get_dpImg_src=get_dpImg_src)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -647,11 +803,11 @@ def user_get_account_details():
             amount = float(request.args.get("amount"))
             payment_method = request.args.get("payment_method")
             if payment_method == "TRC20":
-                return render_template("user/getCryptoDetails.html", selected_amount=amount, payment_method=payment_method)
+                return render_template("user/getCryptoDetails.html", selected_amount=amount, payment_method=payment_method, get_dpImg_src=get_dpImg_src)
                 # return f"Amount is {amount} and payment method is {payment_method}"
             elif payment_method == "Bank Transfer":
                 # return f"Amount is {amount} and payment method is {payment_method}"
-                return render_template("user/getBankDetails.html", user=selected_user, abbrev_to_country=abbrev_to_country, selected_amount=amount, payment_method=payment_method)
+                return render_template("user/getBankDetails.html", user=selected_user, abbrev_to_country=abbrev_to_country, get_dpImg_src=get_dpImg_src, selected_amount=amount, payment_method=payment_method)
             else:
                 return "payment method not selected"
         else:
@@ -739,7 +895,7 @@ def user_recharge():
         if "user" in session:
             if selected_user:
                 if selected_user.account_status == "Verified":
-                    return render_template("user/recharge.html", user=selected_user)
+                    return render_template("user/recharge.html", user=selected_user, get_dpImg_src=get_dpImg_src)
                 else:
                     flash("You need to verify your identity before you recharge credits and buy tickets<br><br>Upload your National ID card pictures here. Admins will review and approve your account. Once your account gets approved, you can recharge and start buying tickets")
                     return redirect("/verify-user-identity")

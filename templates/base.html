@@ -22,6 +22,25 @@
 {% block css %}{% endblock css %}
 
 <body>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="myalert">
+        <span class="closebtn" onclick="this.parentElement.style.display='none';">X</span>
+        <p>{{ message | safe }}</p>
+        {% if category == 'idVerifyWarning' %}
+        <a href="/verify-user-identity" class="btn btnNormal btnWithIcon">
+            <i class="up-right-from-square"></i>
+            <span>Verify Now</span>            
+        </a>
+        {% endif %}
+        
+    </div>
+    {% endfor %}
+  {% endif %}
+    {% endwith %}
+
     <ul class="sideBarMenu menuClose">
         <li><a href="" class="navlink sideBarInnerItem">Home</a></li>
         <!-- <li><a href="" class="navlink">About Us</a></li> -->

@@ -51,6 +51,11 @@ a.navlink{
     /* background: linear-gradient(0deg, gold, black, orange); */
 }
 
+.btn.btnRed{
+    background-color: rgb(206, 0, 0);
+    border: 1px solid rgb(206, 0, 0);
+}
+
 .btn.btnTrans{
     background: none;
     border: 1px solid rgb(151, 151, 151);
@@ -165,3 +170,17 @@ select.inputField option{
       .myalert .closebtn:hover {
         color: black;
       }
+
+.formInfo{
+    row-gap: 10px;
+    background-color: #000000b5;
+    padding: 15px;
+    border-radius: 10px 0px;
+    font-size: 0.9rem;
+}
+.formInfo p{
+    text-align: left;
+}
+.formInfo.danger{
+    background-color: #c30707f5;
+}
