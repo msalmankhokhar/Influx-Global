@@ -689,7 +689,7 @@ def verify_userIdentity():
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
                 if selected_user.account_status == "non-verified":
-                    return render_template("user/verifyID.html", user=selected_user, currentPagespanText="", round=round)
+                    return render_template("user/verifyID.html", user=selected_user, currentPagespanText="", round=round, get_dpImg_src=get_dpImg_src)
                 else:
                     return redirect("/user/account")
             else:
