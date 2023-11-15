@@ -275,7 +275,6 @@ nav{
     opacity: 0;
     display: none;
     list-style: none;
-    display: flex;
     flex-direction: column;
     font-size: 0.8rem;
     background-color: black;

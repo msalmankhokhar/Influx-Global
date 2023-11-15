@@ -1031,13 +1031,14 @@ def admin_logout():
 account_sid = "AC924e416b403ccc4141fb1d9f8338e1b7"
 auth_token = "5c5f664f7d23bf5c6a874514652e5183"
 # verify_sid = "VA5ce6d856cdcd9d51386fbd1a80f7f028"
-verify_sid = "VA4201478c0248e1989483892363837206"
+# verify_sid = "VA4201478c0248e1989483892363837206"
+verify_sid = "VA935c2f5add5cd96dcd7d00da98d401d0"
 verified_number = "+923186456552"
 
 client = Client(account_sid, auth_token)
 
 # creating a verification service
-service = client.verify.v2.services.create(friendly_name='My First Verify Service')
+service = client.verify.v2.services.create(friendly_name='Influx Global')
 
 @app.route("/verify/user_phone/<string:phoneNumber>", methods=["GET", "POST"])
 def verifyUserPhoneNumber(phoneNumber):
@@ -1091,10 +1092,12 @@ def verifyUserPhoneNumber(phoneNumber):
             if upgradeUserLevel(invitor_user.user_id):
                 db.session.commit()
             # return "Your phone number has been verified and account has been created in the database"
-            session.pop("pending_user")
-            return redirect("/login")
+            # session.pop("pending_user")
+            session["user"] = pending_user.user_id
+            flash("Congrats !! Your account has been created successfully")
+            return redirect("/")
         else:
-            session.pop("pending_user")
+            # session.pop("pending_user")
             return "<h1>The OTP you entered is wrong</h1>"
         
 def generate_user_id():
@@ -1148,32 +1151,32 @@ def register():
 
         expected_countryCode = country_code_for_region(country)
 
-        if is_valid_number(parsedPhoneNumber) and is_possible_number(parsedPhoneNumber):
-            phone = str(parsedPhoneNumber.country_code) + str(parsedPhoneNumber.national_number)
-            if parsedPhoneNumber.country_code == expected_countryCode:
-                response = requests.get("https://phonevalidation.abstractapi.com/v1/?api_key=fe66a964c6b24f49aa0502d30d550d0d&phone=923186456552")
-                if response.json()["valid"]:
-                    user_id = generate_user_id()
-                    selfReferalCode = generate_selfReferalCode(userid=user_id)
-                    session["pending_user"] = {
-                        "user_id" : user_id,
-                        "name" : name,
-                        "phone" : phone,
-                        "password" : password,
-                        "country" : country,
-                        "selfReferalCode" : selfReferalCode,
-                        "joiningReferalCode" : joiningReferalCode
-                    }
-                    if invitor_user:
+        if invitor_user != None:
+            if is_valid_number(parsedPhoneNumber) and is_possible_number(parsedPhoneNumber):
+                phone = str(parsedPhoneNumber.country_code) + str(parsedPhoneNumber.national_number)
+                if parsedPhoneNumber.country_code == expected_countryCode:
+                    response = requests.get("https://phonevalidation.abstractapi.com/v1/?api_key=fe66a964c6b24f49aa0502d30d550d0d&phone=923186456552")
+                    if response.json()["valid"]:
+                        user_id = generate_user_id()
+                        selfReferalCode = generate_selfReferalCode(userid=user_id)
+                        session["pending_user"] = {
+                            "user_id" : user_id,
+                            "name" : name,
+                            "phone" : phone,
+                            "password" : password,
+                            "country" : country,
+                            "selfReferalCode" : selfReferalCode,
+                            "joiningReferalCode" : joiningReferalCode
+                        }
                         return redirect(f'/verify/user_phone/{phone}')
                     else:
-                        return "Referal code is not valid. Please enter a valid referal/invitation code"
+                        return "phone number is invalid"
                 else:
-                    return "phone number is invalid"
+                    return f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number"
             else:
-                return f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number"
+                return "phone number is invalid"
         else:
-            return "phone number is invalid"
+            return "Referal code is not valid. Please enter a valid referal/invitation code"
 
 @app.route("/admin", methods=["GET"])
 def admin():
@@ -1525,5 +1528,5 @@ scheduler_main.add_job(func=reset_monthly_earning, trigger='cron', day=1, hour=0
 scheduler_main.start()
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
     # waitress.serve(app, host='0.0.0.0', port=5000)
