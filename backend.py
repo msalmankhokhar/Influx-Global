@@ -1030,6 +1030,7 @@ def admin_logout():
 
 account_sid = "AC924e416b403ccc4141fb1d9f8338e1b7"
 auth_token = "5c5f664f7d23bf5c6a874514652e5183"
+auth_token = "7a89c2ce6fd1174897662d39df70456a"
 # verify_sid = "VA5ce6d856cdcd9d51386fbd1a80f7f028"
 # verify_sid = "VA4201478c0248e1989483892363837206"
 verify_sid = "VA935c2f5add5cd96dcd7d00da98d401d0"
