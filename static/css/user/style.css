@@ -181,7 +181,7 @@ nav{
     row-gap: 15px;
     justify-content: space-between;
     position: relative;
-    padding: 2%;
+    padding: 5% 2%;
 }
 
 .movieCard .movieContentWrapper .content .btn{
