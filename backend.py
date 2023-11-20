@@ -1223,6 +1223,8 @@ def register():
         password = request.form.get('password')
         joiningReferalCode = request.form.get('joiningReferalCode')
 
+        print(f"referal code entered is {joiningReferalCode}")
+
         invitor_user = users.query.filter_by(selfReferalCode = joiningReferalCode).first()
 
         givenPhone = request.form.get('phone')
@@ -1249,18 +1251,17 @@ def register():
                             "joiningReferalCode" : joiningReferalCode
                         }
                         return redirect(f'/verify/user_phone/{phone}')
+                        # return render_template("verify_number.html")
                     else:
-                        flash("phone number is invalid")
-                        return redirect(request.url)
+                        return "phone number is invalid"
                 else:
-                    flash(f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number")
-                    return redirect(request.url)
+                    return f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number"
             else:
-                flash("phone number is invalid")
-                return redirect(request.url)
+                return "phone number is invalid"
         else:
-            flash("Referal code is not valid<br>Please enter a valid referal/invitation code")
-            return redirect(request.url)
+            print(f"url is {request.url}")
+            print(f"url is secure is {request.is_secure}")
+            return "Referal code is not valid<br>Please enter a valid referal/invitation code"
 
 @app.route("/admin", methods=["GET"])
 def admin():

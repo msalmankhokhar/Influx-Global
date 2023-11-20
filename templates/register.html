@@ -87,7 +87,7 @@ form p a{
     color: black;
 }
 #referalCodeInput{
-    width: auto;
+    /* width: auto; */
 }
 
 label{
@@ -156,7 +156,7 @@ select.inputField option{
                 <i class="fa-solid fa-hashtag"></i>
                 {% if referalCode %}
                 <label for="referalCodeInput">Referal Code</label>
-                <input class="inputField inputFieldJs" type="text" placeholder="Referal Code" required id="referalCodeInput" name="joiningReferalCode" value="{{referalCode}}" disabled>
+                <input class="inputField inputFieldJs" type="text" placeholder="Referal Code" required id="referalCodeInput" name="joiningReferalCode" value="{{referalCode}}" readonly>
                 {% else %}
                 <input class="inputField inputFieldJs" type="text" placeholder="Referal Code" required id="referalCodeInput" name="joiningReferalCode">
                 {% endif %}
