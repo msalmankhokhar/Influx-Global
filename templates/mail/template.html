@@ -1,0 +1,62 @@
+{% extends "mail/ticket_buy.html" %}
+
+{% block main %}
+
+<div class="header">
+    <h1>Influx Global</h1>
+    <p>Notification about ticket purchase</p>
+</div>
+
+<div class="content">
+    <h2>Thanks for your purchase</h2>
+
+    <table>
+        <tr>
+            <th>Movie name</th>
+            <td>{{data["title"]}}</td>
+        </tr>
+        <tr>
+            <th>Category</th>
+            <td>{{data["placement"]}}</td>
+        </tr>
+        <tr>
+            <th>Ticket Price($)</th>
+            <td>{{data["ticket_price"]}}</td>
+        </tr>
+        <tr>
+            <th>No. of tickets purchased</th>
+            <td>{{data["tickets_purchased"]}}</td>
+        </tr>
+        <tr>
+            <th>Total Price($)</th>
+            <td>{{data["total_purchase_value"]}}</td>
+        </tr>
+        <tr>
+            <th>Purchase time</th>
+            <td>{{get_readable_date_string(data["purchase_time"])}}</td>
+        </tr>
+        <tr>
+            <th>Purchase time</th>
+            <td>{{get_readable_date_string(data["purchase_time"])}}</td>
+        </tr>
+        <tr>
+            <th>Purchased using</th>
+            <td>{{data["purchased_using"]}}</td>
+        </tr>
+        <tr>
+            <th>Estimated daily profit($</th>
+            <td>{{data["estimated_daily_profit"]}}</td>
+        </tr>
+        <tr>
+            <th>Order status($</th>
+            <td>{{data["status"]}}</td>
+        </tr>
+    </table>
+
+    <p>You will get a daily profit $<strong>{{data["estimated_daily_profit"]}} within the duration of this order</strong></p>
+    <p>Your capital amount $<strong>{{data["total_purchase_value"]}}</strong> will be sent back to your wallet on <strong>{{get_readable_date_string(data["end_time"])}}</strong> according to timezone <strong>{{data["timezone"]}}</strong></p>
+    <p>Upon successfull completion of this order, you will recieve an email notification</p>
+    <p>Check out more on our website: <a href="https://www.influx-global.com" target="_blank">www.influx-global.com</a></p>
+</div>
+
+{% endblock main %}

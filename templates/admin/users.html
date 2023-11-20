@@ -2,6 +2,45 @@
 
 {% block title %}All Users{% endblock title %}
 
+{% block css %}
+<style>
+    th.nameCell, td.nameCell{
+        min-width: 161px;
+    }
+
+    .dpImgWrapper{
+        width: 37px;
+        height: 37px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 100%;
+        background-color: white;
+    }
+
+    .dpImgWrapper i{
+        width: 100%;
+        color: black;
+        font-size: 134%;
+    }
+
+    .dpImg{
+    width: 100%;
+    border-radius: 100%;
+    }
+
+    #profileSpan{
+    /* padding: 5px 10px; */
+    width: 100%;
+    justify-content: normal;
+}
+
+#profileSpan:hover{
+    background-color: #1d1d1d;
+}
+</style>
+{% endblock css %}
+
 {% block main %}
 
 <h1 class="my-1 text-center">All Users</h1>
@@ -13,7 +52,7 @@
                 <th scope="col">#</th>
                 <th scope="col">User ID</th>
                 <th scope="col">Level</th>
-                <th scope="col">Name</th>
+                <th scope="col" class="nameCell h">Name</th>
                 <th scope="col">Account Status</th>
                 <th scope="col">Phone</th>
                 <th scope="col">Password</th>
@@ -33,7 +72,18 @@
                 <td>{{ usersList.index(user) + 1 }}</td>
                 <td>{{user.user_id}}</td>
                 <td>{{user.level}}</td>
-                <td>{{user.name}}</td>
+                <td class="nameCell b">
+                    <span class="btnWithIcon topBarSpan" id="profileSpan">
+                        <div class="dpImgWrapper">
+                            {% if get_dpImg_src(user.user_id) %}
+                            <img class="dpImg" src="{{get_dpImg_src(user.user_id)}}" alt="DP">
+                            {% else %}
+                            <i class="fa-solid fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <span>{{user.name}}</span>
+                    </span>
+                </td>
                 {% if user.account_status == "non-verified" %}
                     <td class="btnsT"><span class="userACStatus notv">{{ user.account_status }}</span></td>
                 {% elif user.account_status == "Pending" %}

@@ -292,8 +292,6 @@
         <div class="profileSection">
             <span class="userId infoBlock">User Id {{user.user_id}}</span>
             <div class="profilePicWrapper" id="profilePicWrapper">
-                <!-- <span>{{ user.name[0] }}</span> -->
-                <!-- <i class="fa-solid fa-user" style="color: #adadad;"></i> -->
 
                 {% if get_dpImg_src(user.user_id) %}
                 <img class="dpImg" src="{{get_dpImg_src(user.user_id)}}" alt="DP">

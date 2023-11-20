@@ -181,7 +181,7 @@ div.tableWrapper{
     height: 65px;
 }
 
-#moviesTable th, td{
+th, td{
     text-align: center;
     vertical-align: middle;
     font-size: 0.9rem;
@@ -196,7 +196,7 @@ div.tableWrapper{
 
 .movieThumbnail{
     /* width: 100px; */
-    width: 5vw;
+    width: 61px;
     border: 2px solid white;
 }
 

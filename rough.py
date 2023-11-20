@@ -217,7 +217,14 @@ country_name = abbrev_to_country['TH']
 
 # for key in mydict:
 #     print(f"Key is {key} and value is {mydict[key]}")
-timezone = pytz.timezone(timezone_dict['TH'][0])
+# timezone = pytz.timezone(timezone_dict['TH'][0])
+user_country_timezone = pytz.timezone(timezone_dict["IN"][0])
+data = {"timezone" : str(user_country_timezone)}
+import json
+datastr = json.dumps(data)
+# print(datastr)
+
+print(country_code_for_region("PK"))
 # print(datetime.now(tz=timezone))
 # print(f"timezone is {timezone}")
 # print(datetime.strptime("20 Dec 2023", "%d %b %Y"))
@@ -233,4 +240,4 @@ timezone = pytz.timezone(timezone_dict['TH'][0])
 # estimated_daily_profit = total_prrchase_value * (profit_percentage/100)
 # print(f"estimated dailty profit is {estimated_daily_profit}")
 
-print(datetime.strptime("2023-14-09", "%Y-%d-%m").date())
+# print(datetime.strptime("2023-14-09", "%Y-%d-%m").date())

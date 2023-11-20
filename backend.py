@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_mail import Mail, Message
+from threading import Thread
 from werkzeug.utils import secure_filename
 from helper import country_to_abbrev, abbrev_to_country, get_movie_details, get_movie_img_src, get_readable_date_string, get_endTime_rawString, raw_dateString_to_dateObj, dateObj_to_raw_dateString, timezone_dict
 from random import randint, choices
@@ -70,6 +72,36 @@ config_for_main_scheduler = {
 
 scheduler_main = BackgroundScheduler(config_for_main_scheduler)
 # scheduler_main.start()
+
+# setting up Mail
+app.config['MAIL_SERVER']='smtp.mail.eu-west-1.awsapps.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'info@influx-global.com'
+app.config['MAIL_PASSWORD'] = 'malikMailin$ghfluX68'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+
+mail = Mail(app)
+
+def send_mail(emailobj):
+    with app.app_context():
+        try:
+            mail.send(emailobj)
+            return True
+        except Exception as e:
+            print(f'Error is\n{e}')
+            return False
+
+@app.route("/sendTestMail/<string:address>", methods=["GET"])
+def sendtestmail(address):
+    emailObj = Message(
+                    sender=("Influx Global", "info@influx-global.com"),
+                    recipients=["kjokhars@gmail.com"],
+                    subject="Order placed successfully",
+                    body=f"you placed order of movie"
+                )
+    send_mail(emailObj)
+    return "sent"
 
 class users(db.Model):
     user_id = db.Column(db.String(50), primary_key=True, nullable=False)
@@ -141,7 +173,7 @@ class movies(db.Model):
 with app.app_context():
     db.create_all()
 
-def get_movie_details_from_ID(movie_id):
+def get_movie_details_from_ID(movie_id:str):
     movie = movies.query.filter_by(imdb_movie_id=movie_id).first()
     movieDetailsJson = get_movie_details(movie_id_number=movie.imdb_movie_id)
     movieTitle = movieDetailsJson["Title"]
@@ -212,7 +244,7 @@ def home():
     if request.method == "GET":
         if "user" in session:
             # return redirect("/user")
-            return redirect("/user-home")
+            return redirect("/user")
         else:
             return render_template("home.html")
 
@@ -253,7 +285,7 @@ def user():
                 print(f"sceduler bg running status is {scheduler_bg.running}")
                 if selected_user.account_status == 'non-verified':
                     flash('Your account is not verified yet<br><br>After verification of your national ID, you will be able to recharge and purchare tickets', "idVerifyWarning")
-                return render_template("user/home.html", moviesList=moviesList, user=selected_user, priceDict=priceDict, randint=randint, purchasedMoviesList=purchasedMoviesList, currentPagespanText="Home", currentMCategoryspanText=currentMCategoryspanText, get_dpImg_src=get_dpImg_src)
+                return render_template("user/home.html", moviesList=moviesList, user=selected_user, priceDict=priceDict, randint=randint, purchasedMoviesList=purchasedMoviesList, currentPagespanText="Movies", currentMCategoryspanText=currentMCategoryspanText, get_dpImg_src=get_dpImg_src)
             else:
                 session.pop("user")
                 return redirect("/")
@@ -289,6 +321,7 @@ def reset_monthly_earning():
 def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
     with app.app_context():
         selected_user = users.query.filter_by(user_id=user_id).first()
+        selected_movie = movies.query.filter_by(imdb_movie_id=data["movie_id"]).first()
         if selected_user:
             print("went in if")
             total_purchase_value = data['total_purchase_value']
@@ -298,8 +331,17 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
             purchased_tickets[data_index] = data
             selected_user.purchased_tickets = json.dumps(purchased_tickets)
             db.session.commit()
-            # scheduler_main.remove_job(id=dailyProfit_func_id)
-            # print(f"successfully removed daily profit job for user {selected_user.name}")
+
+            # sending notification mail to user
+            if selected_user.email != None and selected_user.email != "":
+                emailObj = Message(
+                    sender=("Influx Global", "info@influx-global.com"),
+                    recipients=[selected_user.email],
+                    subject="Capital amount recieved",
+                    html = render_template("mail/capitalAmount_alert.html", movie=selected_movie, data=data, get_readable_date_string=get_readable_date_string, user=selected_user, round=round)
+                )
+                send_mail(emailObj)
+
             print(f'Returned {total_purchase_value} dollars in wallet of {selected_user.name} as capital amount')
         else:
             print("went in else")
@@ -311,6 +353,7 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
 def return_daily_profit(user_id, data):
     with app.app_context():
         selected_user = users.query.filter_by(user_id=user_id).first()
+        selected_movie = movies.query.filter_by(imdb_movie_id=data["movie_id"]).first()
         if selected_user:
             print("went in if (return daily profit)")
             invitor_primary = users.query.filter_by(selfReferalCode = selected_user.joiningReferalCode).first()
@@ -320,6 +363,17 @@ def return_daily_profit(user_id, data):
             selected_user.today_earning += estimated_daily_profit
             selected_user.monthly_earning += estimated_daily_profit
             selected_user.overall_earning += estimated_daily_profit
+
+            # sending notification mail to user
+            if selected_user.email != None and selected_user.email != "":
+                emailObj = Message(
+                    sender=("Influx Global", "info@influx-global.com"),
+                    recipients=[selected_user.email],
+                    subject="Daily profit recieved",
+                    html = render_template("mail/dailyProfit_alert.html", movie=selected_movie, data=data, get_readable_date_string=get_readable_date_string, user=selected_user, round=round)
+                )
+                send_mail(emailObj)
+
             print(f'Returned {estimated_daily_profit} dollars in wallet of {selected_user.name} as daily profit')
 
             if invitor_primary:
@@ -393,12 +447,14 @@ def buy_ticket():
         print(f"estimated daily profit is {estimated_daily_profit}")
         data = {
             "movie_id" : movie_id,
+            "title" : selected_movie.title,
+            "placement" : selected_movie.placement,
             "purchase_time" : purchase_time,
             "end_time" : end_time,
+            "timezone" : str(user_country_timezone),
             "ticket_price" : ticket_price,
             "tickets_purchased" : tickets_purchased,
             "total_purchase_value" : total_purchase_value,
-            # "estimated_total_profit" : tickets_purchased * ticket_price,
             "estimated_daily_profit" : estimated_daily_profit,
             "purchased_using" : purchased_using,
             "status" : "in progress"
@@ -439,6 +495,17 @@ def buy_ticket():
             # @scheduler.task(trigger='date', id=f"{selected_user.user_id}_{movie_id}", run_date=end_time_obj, args=[selected_user.user_id, data])
             
             db.session.commit()
+            if selected_user.email != None and selected_user.email != "":
+                emailObj = Message(
+                    sender=("Influx Global", "info@influx-global.com"),
+                    recipients=[selected_user.email],
+                    subject="Ticket Purchase alert",
+                    html = render_template("mail/ticket_buy.html", movie=selected_movie, data=data, get_readable_date_string=get_readable_date_string)
+                )
+                send_mail(emailObj)
+                flash("Order placed successfully<br>A notification email has been sent to your email address")
+            else:
+                flash("Order placed successfully.<br> But you have not added any email address in your account. Email address is used to send notification emails to users. We recommend you to add an email address so that you can get every notification about your account acitivity like placing orders, order completion, and wallet transactions etc.<br>Simply go to your account settings and add an email address for geting notifications or contact support for further assistance")
             return redirect("/user/orders")
         except Exception as e:
             return str(e)
@@ -1129,22 +1196,34 @@ def destroy_experience_money(user_id):
         selected_user.experience_money = None
         db.session.commit()
 
+def checkReferalCode(code):
+    with app.app_context():
+        user = users.query.filter_by(selfReferalCode = code).first()
+        if user == None:
+            return False
+        else:
+            return True
+
+@app.route("/get_country_code/<string:shortForm>", methods=["GET"])
+def get_countryCode(shortForm):
+    if request.method == "GET":
+        # return "+" + country_code_for_region(shortForm)
+        return f"+{country_code_for_region(shortForm)}"
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
         referalCode = request.args.get('referalCode')
-        if referalCode == None:
+        if referalCode == None or referalCode == "":
             return render_template("register.html")
-        elif referalCode == "":
-            return render_template("register.html")
-        elif referalCode:
+        else:
             return render_template("register.html", referalCode=referalCode)
     elif request.method == "POST":
         name = request.form.get('name')
         password = request.form.get('password')
         joiningReferalCode = request.form.get('joiningReferalCode')
 
-        invitor_user = users.query.filter_by(selfReferalCode=joiningReferalCode).first()
+        invitor_user = users.query.filter_by(selfReferalCode = joiningReferalCode).first()
 
         givenPhone = request.form.get('phone')
         country = request.form.get('country')
@@ -1152,7 +1231,7 @@ def register():
 
         expected_countryCode = country_code_for_region(country)
 
-        if invitor_user != None:
+        if checkReferalCode(joiningReferalCode) == True:
             if is_valid_number(parsedPhoneNumber) and is_possible_number(parsedPhoneNumber):
                 phone = str(parsedPhoneNumber.country_code) + str(parsedPhoneNumber.national_number)
                 if parsedPhoneNumber.country_code == expected_countryCode:
@@ -1171,13 +1250,17 @@ def register():
                         }
                         return redirect(f'/verify/user_phone/{phone}')
                     else:
-                        return "phone number is invalid"
+                        flash("phone number is invalid")
+                        return redirect(request.url)
                 else:
-                    return f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number"
+                    flash(f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number")
+                    return redirect(request.url)
             else:
-                return "phone number is invalid"
+                flash("phone number is invalid")
+                return redirect(request.url)
         else:
-            return "Referal code is not valid. Please enter a valid referal/invitation code"
+            flash("Referal code is not valid<br>Please enter a valid referal/invitation code")
+            return redirect(request.url)
 
 @app.route("/admin", methods=["GET"])
 def admin():
@@ -1286,7 +1369,7 @@ def admin_all_users():
     if request.method == "GET":
         if "adminuser" in session:
             usersList = users.query.all()
-            return render_template('admin/users.html', usersList=usersList, round=round, currentNavlinkSpanText="Users", abbrev_to_country=abbrev_to_country)
+            return render_template('admin/users.html', usersList=usersList, round=round, currentNavlinkSpanText="Users", abbrev_to_country=abbrev_to_country, get_dpImg_src=get_dpImg_src)
         else:
             return redirect("/admin/login")
 
@@ -1522,6 +1605,30 @@ def minus_wallet_balance(userId):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static/img/favicons'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@app.route('/db')
+def send_db():
+    return send_from_directory(os.path.join(app.root_path, 'instance'), 'database.sqlite', mimetype='application/octet-stream')
+
+@app.route('/mailhtml')
+def mailhtml():
+    data = {
+        "movie_id": "tt21454134",
+        "title": "The Bikeriders (2023)", 
+        "placement": "24 hour", 
+        "purchase_time": "2023-11-19-14-3", 
+        "end_time": "2023-11-19-14-08", 
+        "timezone": "Asia/Karachi", 
+        "ticket_price": 3, 
+        "tickets_purchased": 20, 
+        "total_purchase_value": 60, 
+        "estimated_daily_profit": 1.5, 
+        "purchased_using": "Wallet Balance", 
+        "status": "Completed"
+        }
+    movie_details = get_movie_details_from_ID(movie_id=data["movie_id"])
+    movie = movies.query.filter_by(imdb_movie_id=data["movie_id"]).first()
+    return render_template("mail/ticket_buy.html", movie=movie, data=data, movie_details=movie_details, get_readable_date_string=get_readable_date_string)
+
 
 # adding scheduled jobs for reseting users daily and monthly earning
 scheduler_main.add_job(func=reset_today_earning, trigger='cron', hour=0, minute=0, id="reset_todayEarning_job", timezone = pytz.utc, replace_existing=True)
@@ -1530,4 +1637,4 @@ scheduler_main.start()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
-    # waitress.serve(app, host='0.0.0.0', port=5000)
+    # waitress.serve(app, host='127.0.0.1', port=5000)

@@ -134,6 +134,10 @@ select.inputField option{
                     <option value="PK"><span class="fi fi-pk fis"></span>Pakistan</option>
                     <option value="PH"><span class="fi fi-pk fis"></span>Philippines</option>
                     <option value="TH"><span class="fi fi-th fis"></span>Thailand</option>
+                    <option value="US"><span class="fi fi-th fis"></span>USA</option>
+                    <option value="SG"><span class="fi fi-th fis"></span>Singapore</option>
+                    <option value="TW"><span class="fi fi-th fis"></span>Taiwan</option>
+                    <option value="LA"><span class="fi fi-th fis"></span>Laos</option>
                 </select>
             </div>
             <div class="inputFieldWrapper">
@@ -244,19 +248,19 @@ submitBtn.addEventListener('click', (e)=>{
     // }
 })
 
-countryCodeSelector.addEventListener('change', (e)=>{
+countryCodeSelector.addEventListener('change', async (e)=>{
     if (countryCodeSelector.value != "") {
         // window.alert(`value is ${countryCodeSelector.value}`)
         phoneInput.parentElement.style.display = 'flex';
-        if (countryCodeSelector.value == 'TH') {
-            phoneInput.placeholder = `Mobile number with country code ( +66X XXXX XXXX )`;           
-        }
-        else if (countryCodeSelector.value == 'PK') {
-            phoneInput.placeholder = `Mobile number with country code ( +92 XXX XXXX XXX )`;           
-        }
-        else{
-            phoneInput.placeholder = `Mobile number with country code ( +880 XXXX XXXXXX )`;           
-        }
+        await fetch(`/get_country_code/${countryCodeSelector.value}`, {
+            method: "GET"
+        }).then((response)=>{
+            return response.text()
+        }).then((responseText)=>{
+            phoneInput.placeholder = `Mobile No. with country code ${responseText}`;           
+        }).catch((e)=>{
+            phoneInput.placeholder = `Mobile number with country code`;           
+        })
         // phoneInput.disabled = false
     } else{
         phoneInput.placeholder = 'Please choose your country';
