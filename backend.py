@@ -970,9 +970,10 @@ def user_get_account_details():
         return redirect("/user/wallet")
 
 # setting up UniPayment API
-unipayment_client_id = 'bb6d66bc-b466-48a2-ae5c-f4002c9c3bc1'
-unipayment_client_secret = 'F6EGZnmJTyY7Z1VQuJpwr864FV6D3eeRo'
-unipayment_app_id = 'b52153b8-0c10-4350-b246-d27c6d5b1d85'
+unipayment_client_id = 'fa4b2663-69c4-4790-903c-e8925d3b817e'
+unipayment_client_secret = '3x3fU6cYkXBswAMUCJu8XD4cXa1VTcm9H'
+unipayment_app_id = '44af6c09-edb6-4107-bb18-50612717c5c4'
+
 unipaymet_client = UniPaymentClient(unipayment_client_id, unipayment_client_secret)
 
 @app.route("/user/recharge", methods=["GET", "POST"])
@@ -996,7 +997,8 @@ def user_recharge():
         amount =  request.form.get('amount')
         if "pending_invoice" in session:
             session.pop("pending_invoice")
-        order_id = session["user"]
+        time_str = datetime.now().strftime("H%M%S")    
+        order_id = session["user"] + "_" + time_str
         invoice_request = CreateInvoiceRequest(
             app_id=unipayment_app_id,
             title='Recharge Wallet - Influx Global',
@@ -1005,8 +1007,8 @@ def user_recharge():
             price_currency='USD',
             redirect_url='https://influx-global.com/user/wallet',
             notify_url='https://influx-global.com/user/wallet/verify_recharge',
-            # redirect_url='http://127.0.0.1:5000/user/wallet',
-            # notify_url='http://127.0.0.1:5000/user/wallet/verify_recharge',
+            # redirect_url='https://893a-103-82-122-16.ngrok-free.app/user/wallet',
+            # notify_url='https://893a-103-82-122-16.ngrok-free.app/user/wallet/verify_recharge',
             pay_currency='USDT',
             network='NETWORK_TRX',
             ext_args=None,
@@ -1037,7 +1039,7 @@ def verify_wallet_recharge():
                 this_invoice_id = notify["invoice_id"]
                 paid_amount = notify["paid_amount"]
                 confirmed_amount = notify["confirmed_amount"]
-                user_id = notify["order_id"]
+                user_id = notify["order_id"][:8]
                 # user_id = '45937618'
                 selected_user = users.query.filter_by(user_id=user_id).first()
                 print(f"selected user name is {selected_user.name}")

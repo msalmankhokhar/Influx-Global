@@ -224,7 +224,10 @@ import json
 datastr = json.dumps(data)
 # print(datastr)
 
-print(country_code_for_region("PK"))
+# print(country_code_for_region("PK"))
+
+uid = "12345678_0102"
+print(uid[:8])
 # print(datetime.now(tz=timezone))
 # print(f"timezone is {timezone}")
 # print(datetime.strptime("20 Dec 2023", "%d %b %Y"))
