@@ -141,7 +141,7 @@ main{
             </div>
 
             <div class="formInfo danger">               
-                <p><span><i class="fa-solid fa-circle-info"></i></span> The phone number should me in international format(including country code)</p>
+                <p><span><i class="fa-solid fa-circle-info"></i></span> The phone number should be in international format(including country code)</p>
             </div>
             <label for="phoneInput">Your Phone number</label>
             <div class="inputFieldWrapper">
@@ -150,7 +150,7 @@ main{
             </div>
 
             <div class="formInfo">               
-                <p><span><i class="fa-solid fa-circle-info"></i></span> Adding an email address to your account in recommended. This email will be used to to send account notifications about your orders, recharge and withdraw. Also it will be used to reset the password in case you forget your password</p>
+                <p><span><i class="fa-solid fa-circle-info"></i></span> Adding an email address to your account in recommended. This email will be used to to send notifications about your orders, recharge and withdraw</p>
             </div>
             <label for="phoneInput">Email (optional but recommended)</label>
             <div class="inputFieldWrapper">
@@ -169,7 +169,11 @@ main{
             </div>
 
             <button type="submit" class="btn btnNormal" id="submitBtn">Save changes</button>
+            {% if source == "admin" %}
+            <a href="/admin/all_users" class="btn btnTrans black">Cancel</a>
+            {% else %}
             <a href="/user/account" class="btn btnTrans black">Cancel</a>
+            {% endif %}
         </form>
     </section>
 </main>

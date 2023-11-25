@@ -54,6 +54,7 @@
                 <th scope="col">Level</th>
                 <th scope="col" class="nameCell h">Name</th>
                 <th scope="col">Account Status</th>
+                <th scope="col">Email</th>
                 <th scope="col">Phone</th>
                 <th scope="col">Password</th>
                 <th scope="col">Country</th>
@@ -61,6 +62,7 @@
                 <th scope="col">Overall Deposit</th>
                 <th scope="col">Wallet Balance</th>
                 <th scope="col">Experience Money</th>
+                <th scope="col">Active Orders</th>
                 <th scope="col">Self Referal Code</th>
                 <th scope="col">Joining Referal Code</th>
                 <th scope="col">Actions</th>
@@ -91,6 +93,13 @@
                 {% elif user.account_status == "Verified" %}
                     <td class="btnsT"><span class="userACStatus verified">{{ user.account_status }}</span></td>
                 {% endif %}
+
+                {% if user.email %}
+                <td>{{user.email}}</td>               
+                {% else %}
+                <td>N/A</td>
+                {% endif %}
+                
                 <td>{{user.phone}}</td>
                 <td>{{user.password}}</td>
                 <td>{{abbrev_to_country[user.country]}}</td>
@@ -103,6 +112,8 @@
                 {% else %}
                 <td>{{round(user.experience_money, 2)}}</td>
                 {% endif %}
+
+                <td>{{get_pendingOrders(user)}}</td>
                 
                 <td>{{user.selfReferalCode}}</td>
                 <td>{{user.joiningReferalCode}}</td>
@@ -110,6 +121,7 @@
                     <a href="/admin/add_wallet_balance/{{ user.user_id }}" class="btn btn-warning">Add Balance</a>
                     <a href="/admin/minus_wallet_balance/{{ user.user_id }}" class="btn btn-info">Deduct Balance</a>
                     <a href="/admin/delete_user/{{user.user_id}}" class="btn btn-danger userDelBtn">Delete User</a>
+                    <a href="/user_account_settings/{{user.user_id}}?source=admin" class="btn btn-success">Account Settings</a>
                 </td>
             </tr>
             {% endfor %}

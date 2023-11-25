@@ -292,11 +292,24 @@ def user():
         else:
             return redirect("/")
         
-def generate_level_upgrade_string(user_level:int, user_current_referals:int):
+def generate_level_upgrade_string(user_level:int, user_current_referals:int, user:users):
     selected_level = levels.query.filter_by(level_number = user_level).first()
     next_level = levels.query.filter_by(level_number = (user_level+1)).first()
+    required_overall_deposit = False
+    required_referals = False
+    od_str = ""
+    or_str = ""
+    comman_str = f"to aquire level {next_level.level_number}"
     if user_level > 0 and user_level < 7:
-        return f"Grow your overall deposit to {next_level.minimum_overall_deposit} and invite {next_level.minimum_overall_invitation - user_current_referals} more people to aquire level {next_level.level_number}"
+        if user.overall_deposit < next_level.minimum_overall_deposit:
+            required_overall_deposit = next_level.minimum_overall_deposit - user.overall_deposit
+        if user.overall_referals < next_level.minimum_overall_invitation:
+            required_referals = next_level.minimum_overall_invitation - user.overall_referals
+        if required_overall_deposit != False:
+            od_str = f"Grow your overall deposit to {next_level.minimum_overall_deposit}, "
+        if required_referals != False:
+            or_str = f"Invite {required_referals} more people to aquire level {next_level.level_number} "
+        return od_str + or_str + comman_str
     elif user_level == 0:
         return f"Make your first deposit of {next_level.minimum_overall_deposit} to aquire level {next_level.level_number}"
     elif user_level == 7:
@@ -328,7 +341,8 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
             selected_user.wallet_balance += total_purchase_value
             data["status"] = "Completed"
             purchased_tickets = json.loads(selected_user.purchased_tickets)
-            purchased_tickets[data_index] = data
+            # purchased_tickets[data_index] = data
+            purchased_tickets.pop(data_index)
             selected_user.purchased_tickets = json.dumps(purchased_tickets)
             db.session.commit()
 
@@ -598,60 +612,67 @@ def validate_emailAddress(emailAddress):
     else:
         return False
 
-@app.route("/user/account_settings", methods=["GET", "POST"])
-def user_ac_settings():
-    if "user" in session:
-        user = users.query.filter_by(user_id=session["user"]).first()
-        if request.method == "GET":
-            return render_template("user/ac_settings.html", user=user, get_dpImg_src=get_dpImg_src)
-        elif request.method == "POST":
-            name = request.form.get("name")
-            password = request.form.get("password")
-            givenEmail = request.form.get("email")
+@app.route("/user_account_settings/<string:userid>", methods=["GET", "POST"])
+def user_ac_settings(userid):
+    user = users.query.filter_by(user_id=userid).first()
+    source = request.args.get("source")
+    if request.method == "GET":
+        if user:
+            return render_template("user/ac_settings.html", user=user, get_dpImg_src=get_dpImg_src, source=source)
+        else:
+            return (f"The user with user ID {userid} does not exist")
+    elif request.method == "POST":
+        name = request.form.get("name")
+        password = request.form.get("password")
+        givenEmail = request.form.get("email")
 
-            user.name = name
-            user.password = password
 
-            # validating phone number
-            givenPhone = request.form.get('phone')
-            if givenPhone[0] == "+":
-                givenPhoneWithoutPlus = givenPhone[1:]
-            else:
-                givenPhoneWithoutPlus = givenPhone
-            if user.phone != givenPhoneWithoutPlus:
-                country = user.country
-                parsedPhoneNumber = parse(givenPhone, region=country)
-                expected_countryCode = country_code_for_region(country)
-                if is_valid_number(parsedPhoneNumber) and is_possible_number(parsedPhoneNumber):
-                    phone = str(parsedPhoneNumber.country_code) + str(parsedPhoneNumber.national_number)
-                    if parsedPhoneNumber.country_code == expected_countryCode:
-                        response = requests.get(f"https://phonevalidation.abstractapi.com/v1/?api_key=fe66a964c6b24f49aa0502d30d550d0d&phone={phone}")
-                        if response.json()["valid"]:
-                            user.phone = phone
-                        else:
-                            flash("Phone number is invalid. Please provide a valid, existing phone number, in international format (included with country code)")
-                            return redirect(request.url)
+        user.name = name
+        user.password = password
+
+        # validating phone number
+        givenPhone = request.form.get('phone')
+        if givenPhone[0] == "+":
+            givenPhoneWithoutPlus = givenPhone[1:]
+        else:
+            givenPhoneWithoutPlus = givenPhone
+        if user.phone != givenPhoneWithoutPlus:
+            country = user.country
+            parsedPhoneNumber = parse(givenPhone, region=country)
+            expected_countryCode = country_code_for_region(country)
+            if is_valid_number(parsedPhoneNumber) and is_possible_number(parsedPhoneNumber):
+                phone = str(parsedPhoneNumber.country_code) + str(parsedPhoneNumber.national_number)
+                if parsedPhoneNumber.country_code == expected_countryCode:
+                    response = requests.get(f"https://phonevalidation.abstractapi.com/v1/?api_key=fe66a964c6b24f49aa0502d30d550d0d&phone={phone}")
+                    if response.json()["valid"]:
+                        user.phone = phone
                     else:
                         flash("Phone number is invalid. Please provide a valid, existing phone number, in international format (included with country code)")
                         return redirect(request.url)
                 else:
                     flash("Phone number is invalid. Please provide a valid, existing phone number, in international format (included with country code)")
                     return redirect(request.url)
-            # Phone number validated
+            else:
+                flash("Phone number is invalid. Please provide a valid, existing phone number, in international format (included with country code)")
+                return redirect(request.url)
+        # Phone number validated
 
-            # validating email address
-            if user.email != givenEmail:
-                if validate_emailAddress(givenEmail):
-                    user.email = givenEmail
-                else:
-                    flash("The email you entered does not exists or is Invalid. Please enter an existing and valid email address")
-                    return redirect(request.url)
+        # validating email address
+        if user.email != givenEmail:
+            if validate_emailAddress(givenEmail):
+                user.email = givenEmail
+            else:
+                flash("The email you entered does not exists or is Invalid. Please enter an existing and valid email address")
+                return redirect(request.url)
 
-            db.session.commit()
+        db.session.commit()
+        if source == "admin":
+            flash("Account settings saved successfully")
+            return redirect("/admin/all_users")
+        else:
             flash("Your Account settings saved successfully")
             return redirect("/user/account")
-    else:
-        return redirect("/")
+
 
 @app.route("/get-dp-img-src/<string:user_id>", methods=["GET"])
 def get_dpImg_src(user_id):
@@ -683,7 +704,7 @@ def user_account():
             user_id = session["user"]
             selected_user = users.query.filter_by(user_id = user_id).first()
             if selected_user:
-                level_upgrade_string = generate_level_upgrade_string(selected_user.level, selected_user.overall_referals)
+                level_upgrade_string = generate_level_upgrade_string(selected_user.level, selected_user.overall_referals, selected_user)
                 return render_template("user/account.html", user=selected_user, level_upgrade_string=level_upgrade_string, currentPagespanText="Account", round=round, get_dpImg_src=get_dpImg_src)
             else:
                 session.pop("user")
@@ -1163,7 +1184,7 @@ def verifyUserPhoneNumber(phoneNumber):
             # session.pop("pending_user")
             session["user"] = pending_user.user_id
             flash("Congrats !! Your account has been created successfully")
-            return redirect("/")
+            return redirect("/user-home")
         else:
             # session.pop("pending_user")
             return "<h1>The OTP you entered is wrong</h1>"
@@ -1364,13 +1385,20 @@ def admin_all_movies():
             return render_template('admin/movies.html', moviesList=moviesList, currentNavlinkSpanText="Movies")
         else:
             return redirect("/admin/login")
-    
+
+def get_pendingOrders(user:users):
+    with app.app_context():
+        # user = users.query.filter_by(user_id=user_id).first()
+        orders_list = json.loads(user.purchased_tickets)
+        # pending_orders = [ item for item in orders_dict if item["status"] == "In progress" ]
+        return len(orders_list)
+
 @app.route("/admin/all_users", methods=["GET"])
 def admin_all_users():
     if request.method == "GET":
         if "adminuser" in session:
             usersList = users.query.all()
-            return render_template('admin/users.html', usersList=usersList, round=round, currentNavlinkSpanText="Users", abbrev_to_country=abbrev_to_country, get_dpImg_src=get_dpImg_src)
+            return render_template('admin/users.html', usersList=usersList, round=round, currentNavlinkSpanText="Users", abbrev_to_country=abbrev_to_country, get_dpImg_src=get_dpImg_src, get_pendingOrders=get_pendingOrders)
         else:
             return redirect("/admin/login")
 
@@ -1609,6 +1637,10 @@ def favicon():
 @app.route('/db')
 def send_db():
     return send_from_directory(os.path.join(app.root_path, 'instance'), 'database.sqlite', mimetype='application/octet-stream')
+
+@app.route('/dbjsbg')
+def send_dbjsbg():
+    return send_from_directory(os.path.join(app.root_path), 'jobstore_bg.sqlite', mimetype='application/octet-stream')
 
 @app.route('/mailhtml')
 def mailhtml():
