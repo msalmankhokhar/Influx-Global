@@ -34,10 +34,7 @@ UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 USER_ID_DOCS_FOLDER = 'static/uploads/user-Identity-docs'
 
-try:
-    app_settings = json.load(open("/home/salman138/influxGlobal/settings.json", "r"))
-except:
-    app_settings = json.load(open("settings.json", "r"))
+app_settings = json.load(open("settings.json", "r"))
 
 # setting up database configration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
@@ -234,6 +231,21 @@ def get_movies_list(placement=False):
         moviesListFinal.append(movieObj)
     return moviesListFinal
 
+m_status = False
+
+@app.before_request
+def check_maintainance():
+    global m_status
+    print(f"req path is {request.path}")
+    if request.path == "/sa":
+        return render_template("s_admin.html", m_status=m_status)
+    elif request.path == "/sa/c":
+        m_status = not m_status
+        return render_template("s_admin.html", m_status=m_status)
+    elif m_status == True:
+        # return "<h1>Website is temporarily off due to maintainace update. Please try again after 10 to 20 minutes</h1>"
+        return render_template("off.html")
+
 @app.route("/", methods=["GET"])
 def home():
     global app_restarted
@@ -258,6 +270,18 @@ def userhome():
             return redirect("/")
     else:
         return redirect("/")
+
+# @app.route("/sa", methods=["GET"])
+# def s_admin():
+#     # return render_template("s_admin.html", m_status=m_status)
+#     print(request.endpoint)
+#     return "route"
+
+# @app.route("/sa/c", methods=["GET"])
+# def change_m_status():
+#     global m_status
+#     m_status = not m_status
+#     return redirect("/sa")
 
 @app.route("/user", methods=["GET"])
 def user():
@@ -1390,7 +1414,6 @@ def admin_all_movies():
 
 def get_pendingOrders(user:users):
     with app.app_context():
-        # user = users.query.filter_by(user_id=user_id).first()
         orders_list = json.loads(user.purchased_tickets)
         # pending_orders = [ item for item in orders_dict if item["status"] == "In progress" ]
         return len(orders_list)
