@@ -231,21 +231,6 @@ def get_movies_list(placement=False):
         moviesListFinal.append(movieObj)
     return moviesListFinal
 
-m_status = False
-
-@app.before_request
-def check_maintainance():
-    global m_status
-    print(f"req path is {request.path}")
-    if request.path == "/sa":
-        return render_template("s_admin.html", m_status=m_status)
-    elif request.path == "/sa/c":
-        m_status = not m_status
-        return render_template("s_admin.html", m_status=m_status)
-    elif m_status == True:
-        # return "<h1>Website is temporarily off due to maintainace update. Please try again after 10 to 20 minutes</h1>"
-        return render_template("off.html")
-
 @app.route("/", methods=["GET"])
 def home():
     global app_restarted
@@ -270,18 +255,6 @@ def userhome():
             return redirect("/")
     else:
         return redirect("/")
-
-# @app.route("/sa", methods=["GET"])
-# def s_admin():
-#     # return render_template("s_admin.html", m_status=m_status)
-#     print(request.endpoint)
-#     return "route"
-
-# @app.route("/sa/c", methods=["GET"])
-# def change_m_status():
-#     global m_status
-#     m_status = not m_status
-#     return redirect("/sa")
 
 @app.route("/user", methods=["GET"])
 def user():
