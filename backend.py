@@ -751,6 +751,28 @@ def user_orders():
                 return redirect("/")
         else:
             return redirect("/")
+        
+@app.route("/admin/user-orders/<string:user_id>", methods=["GET"])
+def admin_user_orders(user_id):
+    selected_user = users.query.filter_by(user_id = user_id).first()
+    if selected_user:
+        moviesList = json.loads(selected_user.purchased_tickets)
+        # moviesListFiltered = [ e for e in json.loads(selected_user.purchased_tickets) if movies.query.filter_by(imdb_movie_id=e["movie_id"]).first() != None ]
+        moviesListFilteredDict = filteredOrderedMoviesList(moviesList)
+        moviesListFiltered = moviesListFilteredDict["list"]
+        moviesListFiltered.reverse()
+        if moviesListFilteredDict["should_update_database"]:
+            selected_user.purchased_tickets = json.dumps(moviesListFiltered)
+            db.session.commit()
+        user_level = levels.query.filter_by(level_number=selected_user.level).first()
+        priceDict = {
+                        "24 hour": {"price":3, "profit":user_level.daily_ticket_profit, "duration": "24 Hours", "duration_days":1},
+                        "weekly": {"price":5, "profit":user_level.weekly_ticket_profit, "duration": "1 week (7 days)", "duration_days":7},
+                        "pre sale": {"price":5, "profit":user_level.presale_ticket_profit, "duration": "Till movie release date", "duration_days":30}
+                    }
+        return render_template("admin/orders.html", user=selected_user, moviesList=moviesListFiltered, get_movie_details_from_ID=get_movie_details_from_ID, priceDict=priceDict, get_readable_date_string=get_readable_date_string, currentPagespanText="Orders", round=round, get_dpImg_src=get_dpImg_src)
+    else:
+        return f"The user with user id {user_id} does not exist"
 
 @app.route("/user/wallet", methods=["GET"])
 def user_wallet():

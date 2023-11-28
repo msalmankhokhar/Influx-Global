@@ -113,7 +113,7 @@
                 <td>{{round(user.experience_money, 2)}}</td>
                 {% endif %}
 
-                <td>{{get_pendingOrders(user)}}</td>
+                <td>{{get_pendingOrders(user)}} <a href="/admin/user-orders/{{user.user_id}}" class="btn btn-primary" target="_blank" style="margin-left: 20px;">View</a></td>
                 
                 <td>{{user.selfReferalCode}}</td>
                 <td>{{user.joiningReferalCode}}</td>

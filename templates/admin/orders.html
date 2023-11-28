@@ -22,6 +22,8 @@
 </style>
 {% endblock css %}
 
+{% block topbar %}{% endblock topbar %}
+
 {% block main %}
 
 <div class="container" id="movieCardsContainer">
@@ -41,7 +43,7 @@
             
             <p class="price detailsRow">
                 <span class="heading">Price per ticket: </span>
-                <span class="text">&dollar; {{priceDict[get_movie_details_from_ID(movie['movie_id'])['placement']]['price']}}.00</span></p>
+                <span class="text">&dollar; {{movie['ticket_price']}}.00</span></p>
             <p class="actors detailsRow">
                 <span class="heading">Tickets Purchased: </span>
                 <span class="text">{{ movie['tickets_purchased'] }}</span></p>
@@ -96,11 +98,13 @@
     </div>
     {% endfor %}
     {% else %}
-    <h1 style="text-align: center;">No orders yet. Purchase some movie tickets to show here</h1>
+    <h1 style="text-align: center;">This user has no active orders</h1>
     {% endif %}
 
 </div>
 
 {% endblock main %}
+
+{% block nav %}{% endblock nav %}
 
 {% block js %}{% endblock js %}

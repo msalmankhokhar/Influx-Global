@@ -18,6 +18,7 @@
 
 <body>
 
+    {% block topbar %}
     <div id="topBar">
         <div class="block" style="padding: 5px 10px;">
             <span class="btnWithIcon">
@@ -53,7 +54,8 @@
         <a class="menuLink" href="/user/help">Help</a>
         <a class="menuLink" href="/logout/{{user.user_id}}">Log Out</a>
     </div>
-
+    {% endblock topbar %}
+    
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
