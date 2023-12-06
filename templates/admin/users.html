@@ -8,25 +8,10 @@
         min-width: 161px;
     }
 
-    .dpImgWrapper{
-        width: 37px;
-        height: 37px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 100%;
-        background-color: white;
-    }
-
-    .dpImgWrapper i{
+    .profilePicWrapper i{
         width: 100%;
-        color: black;
+        color: white;
         font-size: 134%;
-    }
-
-    .dpImg{
-    width: 100%;
-    border-radius: 100%;
     }
 
     #profileSpan{
@@ -37,6 +22,9 @@
 
 #profileSpan:hover{
     background-color: #1d1d1d;
+}
+.username-span{
+    text-align: left;
 }
 </style>
 {% endblock css %}
@@ -76,14 +64,14 @@
                 <td>{{user.level}}</td>
                 <td class="nameCell b">
                     <span class="btnWithIcon topBarSpan" id="profileSpan">
-                        <div class="dpImgWrapper">
+                        <div class="profilePicWrapper small">
                             {% if get_dpImg_src(user.user_id) %}
                             <img class="dpImg" src="{{get_dpImg_src(user.user_id)}}" alt="DP">
                             {% else %}
                             <i class="fa-solid fa-user"></i>
                             {% endif %}
                         </div>
-                        <span>{{user.name}}</span>
+                        <span class="username-span">{{user.name}}</span>
                     </span>
                 </td>
                 {% if user.account_status == "non-verified" %}

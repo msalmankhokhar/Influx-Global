@@ -59,9 +59,9 @@
         align-items: center;
     }
 
-    .profilePicWrapper {
+    /* .profilePicWrapper {
         border-radius: 100%;
-        /* background-color: #0a4c9f; */
+        background-color: #0a4c9f;
         background-color: #6a3600;
         padding: 5px;
         display: flex;
@@ -71,7 +71,7 @@
         height: 10vw;
         overflow: hidden;
         position: relative;
-    }
+    } */
 
     .profilePicWrapper i.fa-camera{
         position: absolute;
@@ -80,10 +80,10 @@
         opacity: 0;
     }
     
-    .dpImg{
+    /* .dpImg{
         transition: 0.5s;
         width: 112%;
-    }
+    } */
 
     .profilePicWrapper:hover .dpImg{
         opacity: 0.5;
@@ -291,7 +291,7 @@
     <div id="profileContainer">
         <div class="profileSection">
             <span class="userId infoBlock">User Id {{user.user_id}}</span>
-            <div class="profilePicWrapper" id="profilePicWrapper">
+            <div class="profilePicWrapper large" id="profilePicWrapper">
 
                 {% if get_dpImg_src(user.user_id) %}
                 <img class="dpImg" src="{{get_dpImg_src(user.user_id)}}" alt="DP">

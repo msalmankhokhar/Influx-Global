@@ -160,6 +160,7 @@ class movies(db.Model):
     title = db.Column(db.String, nullable=True, unique=False)
     placement = db.Column(db.String(50), nullable=False, unique=False)
     no_of_tickets = db.Column(db.Integer, nullable=True, unique=False)
+    profit = db.Column(db.Integer, nullable=True, unique=False)
     img_src = db.Column(db.String, nullable=True, unique=False)
 
 # Command for database migrations and commit
@@ -211,6 +212,7 @@ def generate_movie_details_obj(movie):
     movieObj = {
         "id" : movie.imdb_movie_id,
         "imgSrc" : movieImgSrc,
+        "profit" : movie.profit,
         "rating" : movieRating,
         "actors" : movieActors,
         "releaseDate" : movieRelease,
@@ -451,7 +453,11 @@ def buy_ticket():
         }
 
         total_purchase_value = tickets_purchased * ticket_price
-        estimated_daily_profit = total_purchase_value * (profitDict[selected_movie.placement] / 100)
+        if selected_movie.profit:
+            estimated_daily_profit = total_purchase_value * (selected_movie.profit / 100)
+        else:
+            estimated_daily_profit = total_purchase_value * (profitDict[selected_movie.placement] / 100)
+
         print(f"total purchase value is {total_purchase_value}")
         print(f"profit percentage is {profitDict[selected_movie.placement]}")
         print(f"profit percentage in decimal is {profitDict[selected_movie.placement]/100}")
@@ -484,8 +490,8 @@ def buy_ticket():
                 selected_user.wallet_balance -= total_purchase_value
                 
             selected_movie.no_of_tickets -= 1
-            func_id_return_capital = f"capital_{selected_user.user_id}_{movie_id}_{purchase_time}"
-            func_id_return_dailyProfit = f"daily_profit_{selected_user.user_id}_{movie_id}_{purchase_time}"
+            func_id_return_capital = f"ca({selected_movie.title}){selected_user.user_id}_{get_readable_date_string(end_time)}"
+            func_id_return_dailyProfit = f"dp({selected_movie.title}){selected_user.user_id}_{get_readable_date_string(end_time)}"
             print("starting to set sceduler function")
             # scheduler.add_job(func=return_capital_amount, trigger='date', id=func_id, run_date=end_time_obj, args=[selected_user.user_id, data])
 
@@ -1578,13 +1584,20 @@ def admin_edit_movie(movieId):
     elif request.method == "POST":
         placement = request.form.get('placement')
         img_src = request.form.get('img_src')
+        profit = request.form.get('profit')
         no_of_tickets = int(request.form.get('no_of_tickets'))
 
         selected_movie.placement = placement
+
         if img_src and img_src != "":
             selected_movie.img_src = img_src
         else:
             selected_movie.img_src = None
+        if profit and profit != "":
+            selected_movie.profit = profit
+        else:
+            selected_movie.profit = None
+
         selected_movie.no_of_tickets = no_of_tickets
         db.session.commit()
         return redirect("/admin")
@@ -1690,4 +1703,3 @@ scheduler_main.start()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
-    # waitress.serve(app, host='127.0.0.1', port=5000)

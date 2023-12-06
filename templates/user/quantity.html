@@ -203,7 +203,7 @@
             if (quantityInput.value > 0) {
                 let time_now = new Date();
                 let timezone_offset = time_now.getTimezoneOffset()
-                time_now_string = `${time_now.getFullYear()}-${time_now.getMonth() + 1}-${time_now.getDate()}-${time_now.getHours()}-${time_now.getMinutes()}`;
+                time_now_string = `${time_now.getFullYear()}-${time_now.getMonth() + 1}-${time_now.getDate()}-${time_now.getHours()}-${time_now.getMinutes()}-${time_now.getSeconds()}`;
                 let buyTicketUrl = new URL(e.target.href);
                 buyTicketUrl.searchParams.append('tickets_purchased', quantityInput.value);
                 buyTicketUrl.searchParams.append('purchase_time', time_now_string);

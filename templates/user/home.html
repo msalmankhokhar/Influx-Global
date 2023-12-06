@@ -28,7 +28,7 @@
         </div>
         <div class="block" style="font-size: 0.8rem; cursor: pointer;">
             <span class="btnWithIcon topBarSpan" id="profileSpan">
-                <div class="dpImgWrapper">
+                <div class="profilePicWrapper small">
                     {% if get_dpImg_src(user.user_id) %}
                     <img class="dpImg" src="{{get_dpImg_src(user.user_id)}}" alt="DP">
                     {% else %}
@@ -109,13 +109,13 @@
         </div>
 
         <div class="buy">
-            <p>Estimated profit per ticket: <span>{{priceDict[movie['placement']]['profit']}}%</span></p>
-            <!-- {% if movie["id"] in purchasedMoviesList %}
-            <button class="btn btnTrans">Already Purchased</button>
+            {% if movie["profit"] %}
+            <p>Estimated profit per ticket: <span>{{movie['profit']}}%</span></p>
+            <a href="/user/quantity?movie_id={{movie['id']}}&ticket_price={{priceDict[movie['placement']]['price']}}&daily_profit_percent={{movie['profit']}}" class="btn btnNormal buyTicketBtn">Buy Ticket</a>
             {% else %}
+            <p>Estimated profit per ticket: <span>{{priceDict[movie['placement']]['profit']}}%</span></p>
             <a href="/user/quantity?movie_id={{movie['id']}}&ticket_price={{priceDict[movie['placement']]['price']}}&daily_profit_percent={{priceDict[movie['placement']]['profit']}}" class="btn btnNormal buyTicketBtn">Buy Ticket</a>
-            {% endif %} -->
-            <a href="/user/quantity?movie_id={{movie['id']}}&ticket_price={{priceDict[movie['placement']]['price']}}&daily_profit_percent={{priceDict[movie['placement']]['profit']}}" class="btn btnNormal buyTicketBtn">Buy Ticket</a>
+            {% endif %}
         </div>
 
         <hr>
@@ -145,7 +145,7 @@
             <i class="fa-solid fa-receipt"></i>
             <span>Orders</span>
         </a>
-        <a href="/userhome" id="navLogoLink">
+        <a href="/user-home" id="navLogoLink">
             <img id="navLogo" src="{{ url_for('static', filename='img/logos/Png/Influx-global-logo-Final-Files-04.png') }}" alt="">
         </a>
         <a href="/user/account" class="navlink navlinkWithIcon">

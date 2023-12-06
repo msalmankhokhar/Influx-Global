@@ -104,6 +104,10 @@ form p a{
     column-gap: 20px;
 }
 
+.inputFieldWrapper.noBorder{
+    border: none;
+}
+
 .inputFieldWrapper i{
     color: #1b1a6a;
 }
@@ -121,55 +125,55 @@ select.inputField option{
 }
 
 
-    /* The alert message box */
-    .myalert {
-        background-color: #15059b; /* Red */
-        color: white;
+/* The alert message box */
+.myalert {
+background-color: #15059b; /* Red */
+color: white;
 
-        position: fixed;
-        left: 5%;
-        right: 5%;
-        top: 15%;
-        bottom: 15%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        box-sizing: border-box;
-        padding: 40px 40px;
-        row-gap: 49px;
-        /* background-color: #8193bd; */
-        background-color: #222222;
-        backdrop-filter: blur(17px);
-        border: 1px solid white;
-        border-radius: 7px;
-        z-index: 10;
-      }
+position: fixed;
+left: 5%;
+right: 5%;
+top: 15%;
+bottom: 15%;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+box-sizing: border-box;
+padding: 40px 40px;
+row-gap: 49px;
+/* background-color: #8193bd; */
+background-color: #222222;
+backdrop-filter: blur(17px);
+border: 1px solid white;
+border-radius: 7px;
+z-index: 10;
+}
 
-      .myalert p{
-        font-weight: bold;
-      }
-      
-      /* The close button */
-      .myalert .closebtn {
-        color: white;
-        font-weight: bold;
-        font-size: 2rem;
-        line-height: 27px;
-        cursor: pointer;
-        transition: 0.3s;
-        padding: 10px;
-        background-color: red;
-        border-radius: 6px;
-        position: absolute;
-        top: 25px;
-        right: 25px;
-      }
-      
-      /* When moving the mouse over the close button */
-      .myalert .closebtn:hover {
-        color: black;
-      }
+.myalert p{
+font-weight: bold;
+}
+
+/* The close button */
+.myalert .closebtn {
+color: white;
+font-weight: bold;
+font-size: 2rem;
+line-height: 27px;
+cursor: pointer;
+transition: 0.3s;
+padding: 10px;
+background-color: red;
+border-radius: 6px;
+position: absolute;
+top: 25px;
+right: 25px;
+}
+
+/* When moving the mouse over the close button */
+.myalert .closebtn:hover {
+color: black;
+}
 
 .formInfo{
     row-gap: 10px;
@@ -183,4 +187,27 @@ select.inputField option{
 }
 .formInfo.danger{
     background-color: #c30707f5;
+}
+
+.profilePicWrapper {
+    border-radius: 100%;
+    background-color: #0a4c9f;
+    background-color: #6a3600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+.profilePicWrapper.small{
+    width: 34px;
+    height: 34px;
+}
+.profilePicWrapper.large{
+    width: 10vw;
+    height: 10vw;
+}
+.dpImg{
+    transition: 0.5s;
+    width: 105%;
 }

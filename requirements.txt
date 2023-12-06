@@ -12,5 +12,4 @@ Requests
 SQLAlchemy
 twilio
 unipayment
-waitress
 Werkzeug

@@ -240,23 +240,10 @@ nav{
     padding: 10px;
 }
 
-#topBar .block{
-
-}
-
-#topBar .dpImg{
-    width: 34px;
-    border-radius: 100%;
-}
-
 .topBarLogo {
     width: 40px;
     border-radius: 87%;
 }
-
-/* span.btnWithIcon.topBarSpan{
-    background: none;
-} */
 
 #profileSpan{
     padding: 5px 10px;
@@ -303,9 +290,7 @@ nav{
     #movieCardsContainer{
         
     }
-    .movieCard{
-        width: auto;
-    }
+    
     nav{
         height: 4rem;
         justify-content: normal;
@@ -341,6 +326,9 @@ nav{
     }
 }
 @media screen and (max-width: 955px){
+    .movieCard{
+        width: auto;
+    }
     #movieCardsContainer{
         justify-content: normal;
         grid-template-columns: auto;

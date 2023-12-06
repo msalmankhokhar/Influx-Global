@@ -9,12 +9,12 @@
 <style>
 
 main{
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    padding: 0px 5vw;
+    padding: 5vh 5vw;
 }
 
 .left{
@@ -34,7 +34,7 @@ main{
     flex-direction: column;
     align-items: center;
     /* width: 50%; */
-    row-gap: 5vh;
+    row-gap: 1vh;
 }
 
 .right h1{
@@ -138,9 +138,33 @@ select.inputField option{
                 <input class="inputField inputFieldJs" type="text" placeholder="Image link (optional)" id="imgSrcInput" name="img_src" value="{{movie.img_src}}">
                 {% endif %}
             </div>
+
+            {% if movie.profit == None %}
+
+            <div class="inputFieldWrapper noBorder">
+                <input type="checkbox" name="" id="profitCheckBox">
+                <label for="profitCheckBox" style="color: black; font-size: 0.8rem;">Set Custom profit</label>
+            </div>
+            <div class="inputFieldWrapper" id="profitInputWrapper" style="display: none;">
+                <i class="fa-solid fa-percentage"></i>
+                <input class="inputField inputFieldJs" type="number" placeholder="Custom Profit %" required id="profitInput" name="profit" min="1">
+            </div>
+
+            {% else %}
+
+            <div class="inputFieldWrapper noBorder">
+                <input type="checkbox" name="" id="profitCheckBox" checked>
+                <label for="profitCheckBox" style="color: black; font-size: 0.8rem;">Set Custom profit</label>
+            </div>
+            <div class="inputFieldWrapper" id="profitInputWrapper">
+                <i class="fa-solid fa-percentage"></i>
+                <input class="inputField inputFieldJs" type="number" placeholder="Custom Profit %" required id="profitInput" name="profit" min="1" value="{{movie.profit}}">
+            </div>
+            
+            {% endif %}
+
             <button type="submit" class="btn btnNormal" id="submitBtn">Save</button>
             <a href="/admin/all_movies" class="btn btnTrans black" id="submitBtn">Cancel</a>
-            <!-- <p><span>Already Registered? <a href="/login">Login Here</a></span></p> -->
         </form>
     </section>
 </main>
@@ -166,6 +190,17 @@ countryCodeSelector.setCustomValidity("Please select a country");
 let inputsList = [referalCodeInput, noOfTicketsInput]
 
 let movieCategoryOptionList = document.querySelectorAll('.movieCategoryOption');
+
+let profitInputWrapper = document.getElementById("profitInputWrapper");
+let profitInput = document.getElementById("profitInput");
+document.getElementById("profitCheckBox").addEventListener("change", (e)=>{
+    if (e.target.checked) {
+        profitInputWrapper.style.display = "flex";
+    } else {
+        profitInputWrapper.style.display = "none";
+        profitInput.value = "";
+    }
+})
 
 
 
