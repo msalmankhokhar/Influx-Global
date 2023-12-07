@@ -21,8 +21,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from multiprocessing import Process
 import os
-import waitress
 import shutil
+import flask_maintenance
+import waitress
+
 
 app = Flask(__name__)
 # run_with_ngrok(app)
@@ -32,6 +34,12 @@ app_restarted = False
 # files upload configration
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+if os.path.exists("instance/under_maintenance"):
+    app.config['UNDER_MAINTAINANCE'] = True
+else:
+    app.config['UNDER_MAINTAINANCE'] = False
+
 USER_ID_DOCS_FOLDER = 'static/uploads/user-Identity-docs'
 
 app_settings = json.load(open("settings.json", "r"))
@@ -232,6 +240,27 @@ def get_movies_list(placement=False):
         movieObj = generate_movie_details_obj(movie)
         moviesListFinal.append(movieObj)
     return moviesListFinal
+
+maintenance_mode = flask_maintenance.Maintenance(app)
+
+@app.errorhandler(503)
+def under_maintenance(e):
+    return render_template('503.html'), 503
+
+@app.route("/superadmin", methods=["GET"])
+def superadmin():
+    if request.method == "GET":
+        return render_template("s_admin.html", m_status=app.config['UNDER_MAINTAINANCE'])
+    
+@app.route("/change_m_status", methods=["GET"])
+def change_m_status():
+    if request.method == "GET":
+        app.config['UNDER_MAINTAINANCE'] = not app.config['UNDER_MAINTAINANCE']
+        if app.config['UNDER_MAINTAINANCE'] == True:
+            maintenance_mode.enable()
+        else:
+            maintenance_mode.disable()
+        return redirect("/superadmin")
 
 @app.route("/", methods=["GET"])
 def home():
@@ -702,6 +731,7 @@ def delete_dpImg(user_id):
 
 @app.route("/user/account", methods=["GET"])
 def user_account():
+    print(f"request path is {request.path}")
     if request.method == "GET":
         if "user" in session:
             user_id = session["user"]
@@ -1151,10 +1181,10 @@ auth_token = "7a89c2ce6fd1174897662d39df70456a"
 verify_sid = "VA935c2f5add5cd96dcd7d00da98d401d0"
 verified_number = "+923186456552"
 
-client = Client(account_sid, auth_token)
+# client = Client(account_sid, auth_token)
 
 # creating a verification service
-service = client.verify.v2.services.create(friendly_name='Influx Global')
+# service = client.verify.v2.services.create(friendly_name='Influx Global')
 
 @app.route("/verify/user_phone/<string:phoneNumber>", methods=["GET", "POST"])
 def verifyUserPhoneNumber(phoneNumber):

@@ -2,9 +2,9 @@
     padding: 0px;
     margin: 0px;
     color: white;
-    /* font-family: 'Montserrat', sans-serif; */
+    font-family: 'Montserrat', sans-serif;
     font-family: 'Nunito', sans-serif;
-    /* font-family: 'Open Sans', sans-serif; */
+    font-family: 'Open Sans', sans-serif;
     /* font-family: 'Roboto', sans-serif; */
 }
 
@@ -204,8 +204,8 @@ color: black;
     height: 34px;
 }
 .profilePicWrapper.large{
-    width: 10vw;
-    height: 10vw;
+    width: 20vh;
+    height: 20vh;
 }
 .dpImg{
     transition: 0.5s;
