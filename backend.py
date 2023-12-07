@@ -1181,10 +1181,10 @@ auth_token = "7a89c2ce6fd1174897662d39df70456a"
 verify_sid = "VA935c2f5add5cd96dcd7d00da98d401d0"
 verified_number = "+923186456552"
 
-# client = Client(account_sid, auth_token)
+client = Client(account_sid, auth_token)
 
 # creating a verification service
-# service = client.verify.v2.services.create(friendly_name='Influx Global')
+service = client.verify.v2.services.create(friendly_name='Influx Global')
 
 @app.route("/verify/user_phone/<string:phoneNumber>", methods=["GET", "POST"])
 def verifyUserPhoneNumber(phoneNumber):
