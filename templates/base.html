@@ -26,7 +26,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
-    <div class="myalert">
+    <div class="myalert" data-aos="{{aos_style}}" data-aos-duration="{{aos_time}}">
         <span class="closebtn" onclick="this.parentElement.style.display='none';">X</span>
         <p>{{ message | safe }}</p>
         {% if category == 'idVerifyWarning' %}

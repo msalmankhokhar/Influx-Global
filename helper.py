@@ -299,7 +299,6 @@ def get_endTime_rawString(purchaeTime_rawString:str, movie_release_date, categor
     dateObj = raw_dateString_to_dateObj(purchaeTime_rawString)
     if presale:
         dateObj_final = datetime.strptime(movie_release_date, "%d %b %Y")
-        # dateObj_final = dateObj + timedelta(minutes=5)
     elif presale == False and category == '24 hour':
         dateObj_final = dateObj + timedelta(hours=24)
     elif presale == False and category == 'weekly':

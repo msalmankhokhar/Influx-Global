@@ -243,6 +243,13 @@ def get_movies_list(placement=False):
 
 maintenance_mode = flask_maintenance.Maintenance(app)
 
+@app.context_processor
+def inject_vars():
+    return {
+        "aos_style" : "fade-down",
+        "aos_time" : 300
+    }
+
 @app.errorhandler(503)
 def under_maintenance(e):
     return render_template('503.html'), 503
@@ -367,10 +374,12 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
             print("went in if")
             total_purchase_value = data['total_purchase_value']
             selected_user.wallet_balance += total_purchase_value
-            data["status"] = "Completed"
+            # data["status"] = "Completed"
             purchased_tickets = json.loads(selected_user.purchased_tickets)
             # purchased_tickets[data_index] = data
-            purchased_tickets.pop(data_index)
+            # purchased_tickets.pop(data_index)
+            purchased_tickets.remove(data)
+            print(f"\nremoved order was \n {data}")
             selected_user.purchased_tickets = json.dumps(purchased_tickets)
             db.session.commit()
 
@@ -379,7 +388,7 @@ def return_capital_amount(user_id, data, dailyProfit_func_id, data_index):
                 emailObj = Message(
                     sender=("Influx Global", "info@influx-global.com"),
                     recipients=[selected_user.email],
-                    subject="Capital amount recieved",
+                    subject="Order Completed",
                     html = render_template("mail/capitalAmount_alert.html", movie=selected_movie, data=data, get_readable_date_string=get_readable_date_string, user=selected_user, round=round)
                 )
                 send_mail(emailObj)
@@ -636,12 +645,18 @@ def upload_dp():
             return response
         else:
             return redirect("/")
-
+from email_validator import validate_email, EmailNotValidError
 def validate_emailAddress(emailAddress):
-    response = requests.get(f"https://emailvalidation.abstractapi.com/v1/?api_key=e3137e717994425aa4f1c1b8d01667f0&email={emailAddress}")
-    if response.json()["is_smtp_valid"]["value"] and response.json()["is_valid_format"]["value"]:
+    # response = requests.get(f"https://emailvalidation.abstractapi.com/v1/?api_key=e3137e717994425aa4f1c1b8d01667f0&email={emailAddress}")
+    # print(f"Abstract API REsponse is:\n{response.text}")
+    # if response.json()["is_smtp_valid"]["value"] and response.json()["is_valid_format"]["value"]:
+    #     return True
+    # else:
+    #     return False
+    try:
+        validate_email(emailAddress, check_deliverability=True)
         return True
-    else:
+    except EmailNotValidError as e:
         return False
 
 @app.route("/user_account_settings/<string:userid>", methods=["GET", "POST"])
@@ -690,12 +705,15 @@ def user_ac_settings(userid):
         # Phone number validated
 
         # validating email address
-        if user.email != givenEmail:
-            if validate_emailAddress(givenEmail):
-                user.email = givenEmail
+        if givenEmail != user.email:
+            if givenEmail == "" or givenEmail == None:
+                user.email = None
             else:
-                flash("The email you entered does not exists or is Invalid. Please enter an existing and valid email address")
-                return redirect(request.url)
+                if validate_emailAddress(givenEmail):
+                    user.email = givenEmail
+                else:
+                    flash("The email you entered does not exists or is Invalid. Please enter an existing and valid email address")
+                    return redirect(request.url)
 
         db.session.commit()
         if source == "admin":
@@ -1139,7 +1157,9 @@ def login():
         try:
             parsed_phone = parse(user_given_phone)
         except NumberParseException as error:
-            return "Please enter a valid mobile number with country code"
+            # return "Please enter a valid mobile number with country code"
+            flash("<h2>Please enter a valid mobile number with country code<br><br>Make sure to add a + sign at the begining of phone number and try again<h2>")
+            return redirect(request.url)
         else:
             final_phone = str(parsed_phone.country_code) + str(parsed_phone.national_number)
             selected_user = users.query.filter_by(phone=final_phone).first()
@@ -1148,9 +1168,11 @@ def login():
                     session["user"] = selected_user.user_id
                     return redirect("/")
                 else:
-                    return "Wrong Password"
+                    flash("<h2>Wrong Password</h2>")
+                    return redirect(request.url)
             else:
-                return "No account is registered with this Mobile number"
+                flash("<h2>No account is registered with this Mobile number</h2>")
+                return redirect(request.url)
 
 @app.route("/logout/<string:userid>", methods=["GET"])
 def logout(userid):
@@ -1331,15 +1353,20 @@ def register():
                         return redirect(f'/verify/user_phone/{phone}')
                         # return render_template("verify_number.html")
                     else:
-                        return "phone number is invalid"
+                        flash("<h2>Phone number is invalid. Please provide a valid and working Phone/mobile number</h2>")
+                        return redirect(request.url)
                 else:
-                    return f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number"
+                    flash(f"Invalid phone number. This is not a {abbrev_to_country[country]} based phone number. Please enter your valid {abbrev_to_country[country]} phone number")
+                    return redirect(request.url)
             else:
-                return "phone number is invalid"
+                flash("<h2>Phone number is invalid.<br><br>Please provide phone number in full internetional format with a + sign in the begining</h2>")
+                return redirect(request.url)
+                return ""
         else:
             print(f"url is {request.url}")
             print(f"url is secure is {request.is_secure}")
-            return "Referal code is not valid<br>Please enter a valid referal/invitation code"
+            flash("<h2>Referal code is not valid<br>Please enter a valid referal/invitation code</h2>")
+            return redirect(request.url)
 
 @app.route("/admin", methods=["GET"])
 def admin():
@@ -1367,7 +1394,8 @@ def admin_login():
             session["adminuser"] = True
             return redirect("/admin")
         else:
-            return "<h1>Wrong password try Again</h1>"
+            flash("<h2>Wrong password !<br>Please try again</h2>")
+            return redirect("/admin/login")
 
 @app.route("/admin/add_new_user", methods=["GET", "POST"])
 def add_user_mannaul():

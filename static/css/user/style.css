@@ -271,7 +271,7 @@ nav{
     right: 9px;
     /* border: 1px solid #ffffff8f; */
     border-radius: 5px;
-    z-index: 1;
+    z-index: 3;
 }
 #menuContainer.open{
     display: flex;

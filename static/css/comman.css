@@ -143,11 +143,12 @@ box-sizing: border-box;
 padding: 40px 40px;
 row-gap: 49px;
 /* background-color: #8193bd; */
-background-color: #222222;
+/* background-color: #222222; */
+background-color: #363636c9;
 backdrop-filter: blur(17px);
 border: 1px solid white;
 border-radius: 7px;
-z-index: 10;
+z-index: 2;
 }
 
 .myalert p{

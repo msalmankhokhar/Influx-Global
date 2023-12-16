@@ -15,6 +15,7 @@
 {% endblock bs %}
 <link rel="stylesheet" href="/static/css/admin/style.css">
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 {% block css %}{% endblock css %}
 <body>
@@ -22,7 +23,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
     {% for category, message in messages %}
-    <div class="myalert">
+    <div class="myalert" data-aos="{{aos_style}}" data-aos-duration="{{aos_time}}">
         <span class="closebtn" onclick="this.parentElement.style.display='none';">X</span>
         <p>{{ message | safe }}</p>
         {% if category == 'idVerifyWarning' %}
@@ -167,6 +168,10 @@
 </body>
 
 <script src="https://kit.fontawesome.com/7d3f73a100.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init();
+</script>
 <script src="/static/js/admin/script.js"></script>
 {% block js %}
 <script>
