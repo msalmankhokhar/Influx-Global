@@ -1,5 +1,6 @@
 alembic
 APScheduler
+email_validator
 Flask
 Flask_APScheduler
 Flask_Mail
@@ -8,8 +9,10 @@ flask_ngrok
 flask_sqlalchemy
 phonenumbers
 pytz
+pywebview
 Requests
 SQLAlchemy
 twilio
 unipayment
+waitress
 Werkzeug
